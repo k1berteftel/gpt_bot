@@ -11,6 +11,7 @@ from states.state_groups import startSG, adminSG, PaymentSG
 
 user_dialog = Dialog(
     Window(
+        DynamicMedia('media'),
         Format('{text}'),
         Button(Const('💬GPT чат'), id='gpt_chat_switcher', on_click=getters.gpt_switcher),
         Row(
@@ -177,6 +178,7 @@ user_dialog = Dialog(
         state=startSG.gen_prompt_menu
     ),
     Window(
+        DynamicMedia('media'),
         Format('{text}'),
         Column(
             Url(Const('✈️Поделиться'), id='share_url', url=Format('{url}')),

@@ -40,7 +40,9 @@ async def start_getter(event_from_user: User, dialog_manager: DialogManager, **k
             f'<b>🎬 Создание видео</b>. — Преврати свою идею в короткое и яркое видео.'
             f'\n\n<b>Твой баланс:</b> {user.balance}💎'
             f' {bonus_text}')
+    media = MediaAttachment(type=ContentType.PHOTO, path='media/menu.jpg')
     return {
+        'media': media,
         'text': text,
         'admin': admin
     }
@@ -645,7 +647,9 @@ async def profile_getter(event_from_user: User, dialog_manager: DialogManager, *
             f'<code>https://t.me/ultragpt_robot?start={event_from_user.id}</code>\n\n<b>📤 Статистика рефералов</b>'
             f'\n👥 Приглашено: <b>{user.refs}</b>\n💰 Заработано с рефералов: <b>{user.earn} 💎</b>')
     url = f'http://t.me/share/url?url=https://t.me/ultragpt_robot?start={event_from_user.id}'
+    media = MediaAttachment(type=ContentType.PHOTO, path='media/profile_img.jpg')
     return {
+        'media': media,
         'text': text,
         'url': url
     }
