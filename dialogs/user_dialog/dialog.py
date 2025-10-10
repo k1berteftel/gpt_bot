@@ -59,6 +59,8 @@ user_dialog = Dialog(
         state=startSG.image_menu
     ),
     Window(
+        DynamicMedia('media', when='media'),
+        Format('{refer_text}'),
         Const('Отправьте промпт для генерации изображение'),
         Format('<em>Подсказка: {hint}</em>'),
         TextInput(
@@ -73,7 +75,7 @@ user_dialog = Dialog(
             func=getters.get_image_wrong,
             content_types=ContentType.ANY
         ),
-        Button(Const('💡Сгенерировать промпт'), id='image_gen_prompt_switcher', on_click=getters.gen_prompt_switcher),
+        #Button(Const('💡Сгенерировать промпт'), id='image_gen_prompt_switcher', on_click=getters.gen_prompt_switcher),
         SwitchTo(Const('⬅️Назад'), id='back_image_menu', state=startSG.image_menu),
         getter=getters.get_image_prompt_getter,
         state=startSG.get_image_prompt
@@ -123,7 +125,7 @@ user_dialog = Dialog(
             SwitchTo(Const('🕝Длительность'), id='time_choose_switcher', state=startSG.time_choose, when='is_param'),
             SwitchTo(Const('📐Соотношение сторон'), id='ratio_choose_switcher', state=startSG.ratio_choose, when='is_param'),
         ),
-        Button(Const('💡Сгенерировать промпт'), id='video_gen_prompt_switcher', on_click=getters.gen_prompt_switcher),
+        #Button(Const('💡Сгенерировать промпт'), id='video_gen_prompt_switcher', on_click=getters.gen_prompt_switcher),
         SwitchTo(Const('⬅️Назад'), id='back_video_menu', state=startSG.video_menu),
         getter=getters.get_video_prompt_getter,
         state=startSG.get_video_prompt
@@ -191,15 +193,17 @@ user_dialog = Dialog(
         state=startSG.help
     ),
     Window(
-        Format('<b>❌ Не хватает алмазов!</b>\n\nДля генерации нужно:\n⚡️Стоимость: {price} 💎'
-               '\n💎 Ваш баланс: {balance} 💎\n\n\n<b>Как быстро получить алмазы?</b>\n\n<b>🎁 Пригласите друзей</b>\n'
-               'Получите <b>10 💎 за каждого</b> приглашенного друга + 10% от его пополнений!\n<em>Ваша ссылка:</em>\n'
-               '\t<code>{url}</code>\n\n💎 <b>Или пополните баланс</b>\nМгновенно получите нужную сумму и '
-               'продолжайте творить\n\n👇 Выберите способ:'),
+        Format('<b>❌ Не хватает алмазов!</b>\n💸 Ваш баланс: 20 {balance} 💎\n\n<b>Для генерации нужно:</b>'
+               '\n<b>Стоимость: {price} 💎\n<b>Как быстро получить алмазы?</b>\n\n<blockquote><b>🎁 Пригласите друзей</b>\n'
+               'Получите <b>10 💎 за каждого</b> приглашенного друга + 10% от его пополнений!\n'
+               '\n\n💎 <b>Или пополните баланс</b>\nМгновенно получите нужную сумму и '
+               'продолжайте творить</blockquote>\n\n👇 Выберите способ:'),
         Column(
+            Url(Const('🎁 Пригласить друзей'), id='follow_url', url=Format('{url}')),
+            #SwitchTo(Const('💎Бесплатные'), id='task_menu_switcher', state=startSG.tasks_menu),
             Start(Const('💰Пополнить баланс'), id='payment_menu', state=PaymentSG.choose_rate),
-            SwitchTo(Const('💎Бесплатные'), id='task_menu_switcher', state=startSG.tasks_menu),
         ),
+        SwitchTo(Const('⬅️Назад'), id='back', state=startSG.start),
         getter=getters.enough_balance_getter,
         state=startSG.enough_balance
     ),

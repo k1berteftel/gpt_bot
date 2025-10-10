@@ -1,7 +1,7 @@
 import datetime
 import os
 
-from aiogram.types import CallbackQuery, User, Message
+from aiogram.types import CallbackQuery, User, Message, ContentType
 from aiogram.fsm.context import FSMContext
 from aiogram_dialog import DialogManager, ShowMode
 from aiogram_dialog.api.entities import MediaAttachment
@@ -34,14 +34,12 @@ async def start_getter(event_from_user: User, dialog_manager: DialogManager, **k
     if not user.last_generate or user.last_generate < datetime.datetime.now() - datetime.timedelta(days=1):
         free = True
     bonus_text = "\n🎁<b>Бонус</b>: Каждый день тебе доступна <b>1 бесплатная генерация с текстом!</b>" if free else ""
-    text = (f'<b>🤖 Добро пожаловать в Ultra GPT!</b>\n\nЯ — твой универсальный AI-помощник, готовый взяться за '
-            f'любую задачу! Общайся, твори и воплощай идеи в жизнь в пару кликов.\n\n<b>✨ Что умеем?</b>:\n<b>💬 Умный диалог</b> '
-            f'— Задавай вопросы, ищи идеи или просто общайся с продвинутым искусственным интеллектом.\n<b>🎨 '
-            f'Генерация изображений</b> — Опиши картинку словами — и я её нарисую. От абстрактного до фотореалистичного.'
-            f'\n<b>🎬 Создание видео</b>. — Преврати свою идею в короткое и яркое видео. Просто скажи, что '
-            f'хочешь увидеть! — превращай идеи в \n\n<b>Твой баланс:</b> {user.balance}💎'
-            f' {bonus_text}\n\n'
-            f'<b>Выбери действие ниже и начнем творить! 🚀</b>')
+    text = (f'<b>Добро пожаловать в Ultra GPT 👋🏻 </b>\n\\n'
+            f'<b>💬 Умный диалог</b> — Задавай вопросы, ищи идеи или просто общайся с продвинутым ИИ.\n'
+            f'<b>🎨 Генерация изображений</b> — Опиши картинку словами — и я её нарисую.\n'
+            f'<b>🎬 Создание видео</b>. — Преврати свою идею в короткое и яркое видео.'
+            f'\n\n<b>Твой баланс:</b> {user.balance}💎'
+            f' {bonus_text}')
     return {
         'text': text,
         'admin': admin
@@ -253,11 +251,25 @@ async def image_choose(clb: CallbackQuery, widget: Button, dialog_manager: Dialo
 
 async def get_image_prompt_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
     model = dialog_manager.dialog_data.get('model')
+    media = None
+    refer_text = ''
     if model == 'text':
         hint = 'Отправьте текстовое описание картинки, которую вы хотели бы сгенерировать'
     else:
+        media = MediaAttachment(type=ContentType.PHOTO, path='media/image+photo_img.jpg')
+        refer_text = ('<b>Промпт:</b>\n<blockquote expandable>Создайте сцену в галерее современного искусства, '
+                      'используя прилагаемое изображение лица и внешности девушки, не меняя её черты лица. '
+                      'На стене висит большой портрет девушки маслом. Её лицо и верхняя часть тела написаны в '
+                      'реалистичной, экспрессивной манере масляной живописи с текстурированными мазками и '
+                      'приглушенными цветами.\nЧистая красная стена галереи создает профессиональную атмосферу '
+                      'выставки благодаря мягкому освещению, освещающему произведение искусства.\nПеред картиной '
+                      'в тёмно-зелёном кресле, видимом сзади, сидит её бывший парень, держа в руке сигарету, '
+                      'из которой поднимается тонкий дымок, что придаёт сцене кинематографическое и таинственное '
+                      'настроение</blockquote>\n')
         hint = 'Отправьте фото и к нему текстовое описание изменений, которые вы хотели бы произвести с этим фото'
     return {
+        'media': media,
+        'refer_text': refer_text,
         'hint': hint
     }
 
@@ -286,9 +298,10 @@ async def get_image_text(msg: Message, widget: ManagedTextInput, dialog_manager:
         dialog_manager.dialog_data.clear()
         await dialog_manager.switch_to(startSG.start)
         return
+    text = f'<b>✅Готово</b>\n<b>Промпт:</b>\n<code>{text}</code>\n\n<a href="https://t.me/Ultragpt_robot">Бот для генерации</a>'
     message = await msg.answer_photo(
         photo=result,
-        caption='✅Ваша генерация готова'
+        caption=text
     )
     await msg.bot.copy_message(
         chat_id=config.bot.channel_id,
@@ -336,9 +349,10 @@ async def get_image_prompt(msg: Message, widget: MessageInput, dialog_manager: D
         dialog_manager.dialog_data.clear()
         await dialog_manager.switch_to(startSG.start)
         return
+    text = f'<b>✅Готово</b>\n<b>Промпт:</b>\n<code>{text}</code>\n\n<a href="https://t.me/Ultragpt_robot">Бот для генерации</a>'
     message = await msg.answer_photo(
         photo=result,
-        caption='✅Ваша генерация готова'
+        caption=text
     )
     await msg.bot.copy_message(
         chat_id=config.bot.channel_id,
@@ -472,9 +486,10 @@ async def get_video_text(msg: Message, widget: ManagedTextInput, dialog_manager:
         dialog_manager.dialog_data.clear()
         await dialog_manager.switch_to(startSG.start)
         return
+    text = f'<b>✅Готово</b>\n<b>Промпт:</b>\n<code>{text}</code>\n\n<a href="https://t.me/Ultragpt_robot">Бот для генерации</a>'
     message = await msg.answer_video(
         video=result,
-        caption='✅Ваша генерация готова'
+        caption=text
     )
     await msg.bot.copy_message(
         chat_id=config.bot.channel_id,
@@ -520,9 +535,10 @@ async def get_video_prompt(msg: Message, widget: MessageInput, dialog_manager: D
     if not result:
         await msg.answer('🚨Во время генерации произошла какая-то ошибка')
         return
+    text = f'<b>✅Готово</b>\n<b>Промпт:</b>\n<code>{msg.caption}</code>\n\n<a href="https://t.me/Ultragpt_robot">Бот для генерации</a>'
     message = await msg.answer_video(
         video=result,
-        caption='✅Ваша генерация готова'
+        caption=text
     )
     await msg.bot.copy_message(
         chat_id=config.bot.channel_id,
@@ -623,11 +639,11 @@ async def balance_check_switcher(clb: CallbackQuery, widget: Button, dialog_mana
 async def profile_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
     session: DataInteraction = dialog_manager.middleware_data.get('session')
     user = await session.get_user(event_from_user.id)
-    text = (f'<b>👤 Ваш профиль</b>\n\n<b>Баланс</b>: {user.balance} 💎\n\n<b>🔗 Реферальная программа</b>\n'
-            f'Приглашайте друзей и получайте:\n - по 10 💎 за каждого приглашенного\n - 10% от всех '
-            f'пополнений💰 вашего реферала в боте — пожизненно!\n📎<b>KВаша реф. ссылка:</b> \n'
+    text = (f'<b>👤 Ваш профиль</b>\n<b>💸 Баланс</b>: {user.balance} 💎\n\n<b>🔗 Реферальная программа</b>\n'
+            f'<blockquote>Приглашайте друзей и получайте:\n - по 10 💎 за каждого приглашенного\n - 10% от всех '
+            f'пополнений💰 вашего реферала в боте — пожизненно!</blockquote>\n\n📎<b>Ваша реф. ссылка:</b> \n'
             f'<code>https://t.me/ultragpt_robot?start={event_from_user.id}</code>\n\n<b>📤 Статистика рефералов</b>'
-            f'\n\n👥 Приглашено: <b>{user.refs}</b>\n💰 Заработано с рефералов: <b>{user.earn} 💎</b>')
+            f'\n👥 Приглашено: <b>{user.refs}</b>\n💰 Заработано с рефералов: <b>{user.earn} 💎</b>')
     url = f'http://t.me/share/url?url=https://t.me/ultragpt_robot?start={event_from_user.id}'
     return {
         'text': text,
@@ -654,7 +670,7 @@ async def enough_balance_getter(event_from_user: User, dialog_manager: DialogMan
     else:
         sub_model = dialog_manager.dialog_data.get('sub_model')
         price = prices[mode][model].get(sub_model) if sub_model else prices[mode][model]
-    url = f'https://t.me/ultragpt_robot?start={event_from_user.id}'
+    url = f'http://t.me/share/url?url=https://t.me/ultragpt_robot?start={event_from_user.id}'
     return {
         'price': price,
         'balance': user.balance,

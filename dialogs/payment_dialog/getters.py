@@ -43,7 +43,7 @@ async def payment_choose(clb: CallbackQuery, widget: Button, dialog_manager: Dia
     amount = dialog_manager.dialog_data.get('amount')
     payment = clb.data.split('_')[0]
     if payment == 'card':
-        payment = await get_yookassa_url(amount, "Оплата подписки VPN")
+        payment = await get_yookassa_url(amount, f'Покупка {amount}💎 ID: {clb.from_user.id}')
         task = asyncio.create_task(
             wait_for_payment(
                 payment_id=payment.get('id'),
@@ -84,7 +84,7 @@ async def payment_choose(clb: CallbackQuery, widget: Button, dialog_manager: Dia
 
 
 async def process_payment_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
-    price = dialog_manager.dialog_data.get('price')
+    price = dialog_manager.dialog_data.get('amount')
     url = dialog_manager.dialog_data.get('url')
     text = f'<blockquote> - Сумма к оплате: {price}₽</blockquote>'
     return {
