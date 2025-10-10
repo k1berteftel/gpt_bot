@@ -196,7 +196,7 @@ async def generate_image(prompt: str, photos: list[str] = None) -> str | dict:
 
             data.add_field(
                 'reference_images',
-                file_obj,
+                file_obj.read(),
                 filename=Path(image_path).name,
                 content_type=mime_type
             )

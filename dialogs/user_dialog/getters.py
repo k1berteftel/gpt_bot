@@ -276,13 +276,13 @@ async def get_image_text(msg: Message, widget: ManagedTextInput, dialog_manager:
         msg.from_user.id,
         text
     )
-    if not result:
-        await msg.answer('🚨Во время генерации произошла какая-то ошибка')
+    if isinstance(result, dict):
+        await msg.answer(f'🚨Во время генерации произошла ошибка:\n<code>{result.get("error")}</code>')
         dialog_manager.dialog_data.clear()
         await dialog_manager.switch_to(startSG.start)
         return
-    if isinstance(result, dict):
-        await msg.answer(f'🚨Во время генерации произошла ошибка:\n<code>{result.get("error")}</code>')
+    if not result:
+        await msg.answer('🚨Во время генерации произошла какая-то ошибка')
         dialog_manager.dialog_data.clear()
         await dialog_manager.switch_to(startSG.start)
         return
@@ -326,13 +326,13 @@ async def get_image_prompt(msg: Message, widget: MessageInput, dialog_manager: D
     for image in images:
         if os.path.exists(image):
             os.remove(image)
-    if not result:
-        await msg.answer('🚨Во время генерации произошла какая-то ошибка')
+    if isinstance(result, dict):
+        await msg.answer(f'🚨Во время генерации произошла ошибка:\n<code>{result.get("error")}</code>')
         dialog_manager.dialog_data.clear()
         await dialog_manager.switch_to(startSG.start)
         return
-    if isinstance(result, dict):
-        await msg.answer(f'🚨Во время генерации произошла ошибка:\n<code>{result.get("error")}</code>')
+    if not result:
+        await msg.answer('🚨Во время генерации произошла какая-то ошибка')
         dialog_manager.dialog_data.clear()
         await dialog_manager.switch_to(startSG.start)
         return
@@ -462,13 +462,13 @@ async def get_video_text(msg: Message, widget: ManagedTextInput, dialog_manager:
         msg.from_user.id,
         params
     )
-    if not result:
-        await msg.answer('🚨Во время генерации произошла какая-то ошибка')
+    if isinstance(result, dict):
+        await msg.answer(f'🚨Во время генерации произошла ошибка:\n<code>{result.get("error")}</code>')
         dialog_manager.dialog_data.clear()
         await dialog_manager.switch_to(startSG.start)
         return
-    if isinstance(result, dict):
-        await msg.answer(f'🚨Во время генерации произошла ошибка:\n<code>{result.get("error")}</code>')
+    if not result:
+        await msg.answer('🚨Во время генерации произошла какая-то ошибка')
         dialog_manager.dialog_data.clear()
         await dialog_manager.switch_to(startSG.start)
         return
@@ -514,11 +514,11 @@ async def get_video_prompt(msg: Message, widget: MessageInput, dialog_manager: D
         msg.from_user.id,
         params
     )
-    if not result:
-        await msg.answer('🚨Во время генерации произошла какая-то ошибка')
-        return
     if isinstance(result, dict):
         await msg.answer(f'🚨Во время генерации произошла ошибка:\n<code>{result.get("error")}</code>')
+        return
+    if not result:
+        await msg.answer('🚨Во время генерации произошла какая-то ошибка')
         return
     message = await msg.answer_video(
         video=result,
