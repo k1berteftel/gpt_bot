@@ -22,6 +22,7 @@ user_dialog = Dialog(
             SwitchTo(Const('👨‍🏫Cтудентам и школьникам'), id='students_menu_switcher', state=startSG.students_menu),
             SwitchTo(Const('👤Профиль'), id='profile_switcher', state=startSG.profile),
             SwitchTo(Const('🎁Задания'), id='tasks_menu_swithcer', state=startSG.tasks_menu),
+            Start(Const('💰Пополнить баланс'), id='payment_menu', state=PaymentSG.choose_rate),
             SwitchTo(Const('ℹ️Помощь'), id='help_switcher', state=startSG.help),
             Start(Const('Админ панель'), id='admin', state=adminSG.start, when='admin')
         ),
@@ -195,8 +196,8 @@ user_dialog = Dialog(
         state=startSG.help
     ),
     Window(
-        Format('<b>❌ Не хватает алмазов!</b>\n💸 Ваш баланс: 20 {balance} 💎\n\n<b>Для генерации нужно:</b>'
-               '\nСтоимость: {price} 💎\n<b>Как быстро получить алмазы?</b>\n\n<blockquote><b>🎁 Пригласите друзей</b>\n'
+        Format('<b>❌ Не хватает алмазов!</b>\n💸 Ваш баланс: {balance} 💎\n\n<b>Для генерации нужно:</b>'
+               '\nСтоимость: {price} 💎\n\n<b>Как быстро получить алмазы?</b>\n<blockquote><b>🎁 Пригласите друзей</b>\n'
                'Получите <b>10 💎 за каждого</b> приглашенного друга + 10% от его пополнений!\n'
                '\n\n💎 <b>Или пополните баланс</b>\nМгновенно получите нужную сумму и '
                'продолжайте творить</blockquote>\n\n👇 Выберите способ:'),

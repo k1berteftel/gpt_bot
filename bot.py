@@ -19,6 +19,7 @@ from database.build import PostgresBuild
 from database.model import Base
 from config_data.config import load_config, Config
 from handlers.user_handlers import user_router
+from handlers.payment_handlers import payment_router
 from dialogs import get_dialogs
 from middlewares import TransferObjectsMiddleware, RemindMiddleware, OpMiddleware
 
@@ -66,7 +67,7 @@ async def main():
     dp = Dispatcher()  # storage=storage)
 
     # подключаем роутеры
-    dp.include_routers(user_router, *get_dialogs())
+    dp.include_routers(user_router, payment_router, *get_dialogs())
 
     # подключаем middleware
     dp.update.middleware(TransferObjectsMiddleware())

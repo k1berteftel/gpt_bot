@@ -61,7 +61,7 @@ async def payment_choose(clb: CallbackQuery, widget: Button, dialog_manager: Dia
         dialog_manager.dialog_data['url'] = payment.get('url')
         await dialog_manager.switch_to(PaymentSG.process_payment)
         return
-    else:
+    elif payment == 'cb':
         payment = await get_crypto_payment_data(amount)
         task = asyncio.create_task(
             wait_for_payment(
@@ -81,6 +81,26 @@ async def payment_choose(clb: CallbackQuery, widget: Button, dialog_manager: Dia
         dialog_manager.dialog_data['url'] = payment.get('url')
         await dialog_manager.switch_to(PaymentSG.process_payment)
         return
+    else:
+        state: FSMContext = dialog_manager.middleware_data.get('state')
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [InlineKeyboardButton(text='Оплатить', pay=True)],
+                [InlineKeyboardButton(text='Закрыть', callback_data='close_payment')]
+            ]
+        )
+        await state.update_data(dialog_manager.dialog_data)
+        price = int(round(amount * 0.96, 0))
+        prices = [LabeledPrice(label="XTR", amount=price)]
+        await clb.message.answer_invoice(
+            title='Покупка 💎',
+            description=f'Покупка {amount}💎 ID: {clb.from_user.id}',
+            payload=str(amount),
+            currency="XTR",
+            prices=prices,
+            provider_token="",
+            reply_markup=keyboard
+        )
 
 
 async def process_payment_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):

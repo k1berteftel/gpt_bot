@@ -16,10 +16,11 @@ user_router = Router()
 
 
 @user_router.message(CommandStart())
-async def start_dialog(msg: Message, dialog_manager: DialogManager, session: DataInteraction, command: CommandObject):
+async def start_dialog(msg: Message, dialog_manager: DialogManager, session: DataInteraction, command: CommandObject, state: FSMContext):
     args = command.args
     referral = None
     link = None
+    data = {}
     if args:
         link_ids = await session.get_links()
         ids = [i.link for i in link_ids]
@@ -34,10 +35,20 @@ async def start_dialog(msg: Message, dialog_manager: DialogManager, session: Dat
                 await session.add_entry(args)
             try:
                 args = int(args)
-                users = [user.user_id for user in await session.get_users()]
-                if args in users:
-                    referral = args
-                    await session.add_refs(args)
+                if not await session.get_op():
+                    users = [user.user_id for user in await session.get_users()]
+                    if args in users:
+                        referral = args
+                        await session.add_refs(args)
+                        try:
+                            await msg.bot.send_message(
+                                chat_id=referral,
+                                text='<b>+ 10💎 за нового реферала</b>'
+                            )
+                        except Exception:
+                            ...
+                else:
+                    data['referral'] = args
             except Exception as err:
                 print(err)
     await session.add_user(msg.from_user.id, msg.from_user.username if msg.from_user.username else 'Отсутствует',
@@ -56,7 +67,7 @@ async def start_dialog(msg: Message, dialog_manager: DialogManager, session: Dat
             except Exception:
                 ...
             counter += 1
-    await dialog_manager.start(state=startSG.start, mode=StartMode.RESET_STACK)
+    await dialog_manager.start(state=startSG.start, data=data, mode=StartMode.RESET_STACK)
 
 
 @user_router.message(DialogSG.waiting_for_message, F.text)

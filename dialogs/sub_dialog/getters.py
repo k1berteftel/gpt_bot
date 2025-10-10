@@ -31,6 +31,7 @@ async def check_sub(clb: CallbackQuery, widget: Button, dialog_manager: DialogMa
     session: DataInteraction = dialog_manager.middleware_data.get('session')
     bot: Bot = dialog_manager.middleware_data.get('bot')
     left_channels: list[int] = dialog_manager.dialog_data.get('channels')
+    referral = dialog_manager.dialog_data.get('referral')
     channels = await session.get_op()
     for channel in channels:
         member = await bot.get_chat_member(chat_id=channel.chat_id, user_id=clb.from_user.id)
@@ -43,7 +44,15 @@ async def check_sub(clb: CallbackQuery, widget: Button, dialog_manager: DialogMa
                 await session.update_op_entry(channel.id)
                 dialog_manager.dialog_data['channels'] = left_channels
     message = await clb.message.answer('✅Вы можете дальше пользоваться ботом')
-
+    if referral:
+        await session.add_refs(referral)
+        try:
+            await clb.bot.send_message(
+                chat_id=referral,
+                text='<b>+ 10💎 за нового реферала</b>'
+            )
+        except Exception:
+            ...
     await dialog_manager.done()
     await clb.message.delete()
     await dialog_manager.start(startSG.start, mode=StartMode.RESET_STACK)

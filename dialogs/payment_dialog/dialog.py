@@ -32,6 +32,7 @@ payment_dialog = Dialog(
         Column(
             Button(Const('💳Карта'), id='card_payment_choose', on_click=getters.payment_choose),
             Button(Const('🤖CryptoBot'), id='cb_payment_choose', on_click=getters.payment_choose),
+            Button(Const('⭐️Звезды'), id='stars_payment_choose', on_click=getters.payment_choose),
         ),
         SwitchTo(Const('⬅️Назад'), id='back_choose_rate', state=PaymentSG.choose_rate),
         getter=getters.choose_payment_getter,

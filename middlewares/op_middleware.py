@@ -25,6 +25,8 @@ class OpMiddleware(BaseMiddleware):
             return await handler(event, data)
         bot: Bot = data.get('bot')
         dialog_manager: DialogManager = data.get('dialog_manager')
+        referral = dialog_manager.current_context().start_data.get('referral', None) if (
+            dialog_manager.current_context().start_data) else None
         user: User = data.get('event_from_user')
         left = False
         left_channels = []
@@ -38,7 +40,7 @@ class OpMiddleware(BaseMiddleware):
         if left:
             while dialog_manager.has_context():
                 await dialog_manager.done()
-            await dialog_manager.start(SubSG.start, data={'channels': left_channels}, mode=StartMode.RESET_STACK)
+            await dialog_manager.start(SubSG.start, data={'channels': left_channels, 'referral': referral}, mode=StartMode.RESET_STACK)
             return
 
         return await handler(event, data)
