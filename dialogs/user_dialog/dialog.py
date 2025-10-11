@@ -197,8 +197,8 @@ user_dialog = Dialog(
         DynamicMedia('media'),
         Format('{text}'),
         Column(
-            Button(Const('Начать генерацию'), id='start_generate_switcher', on_click=getters.balance_check_switcher),
-            Url(Const('Идея для генерации'), id='exemple_url', url=Format('{url}'))
+            Button(Const('😃Начать генерацию'), id='start_generate_switcher', on_click=getters.balance_check_switcher),
+            Url(Const('💡Идея для генерации'), id='exemple_url', url=Format('{url}'))
         ),
         Button(Const('⬅️Назад'), id='back_choose_model', on_click=getters.back_choose_model),
         getter=getters.example_menu_getter,
