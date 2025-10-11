@@ -19,10 +19,29 @@ admin_dialog = Dialog(
             SwitchTo(Const('Управление ОП'), id='op_menu_switcher', state=adminSG.op_menu),
             SwitchTo(Const('🔗 Управление диплинками'), id='deeplinks_menu_switcher', state=adminSG.deeplinks_menu),
             SwitchTo(Const('👥 Управление админами'), id='admin_menu_switcher', state=adminSG.admin_menu),
+            SwitchTo(Const('Выдать 💎'), id='get_user_data_switcher', state=adminSG.get_user_data),
             Button(Const('📋Выгрузка базы пользователей'), id='get_users_txt', on_click=getters.get_users_txt),
         ),
         Cancel(Const('Назад'), id='close_admin'),
         state=adminSG.start
+    ),
+    Window(
+        Const('Введите telegram ID или username пользователя'),
+        TextInput(
+            id='get_user_data',
+            on_success=getters.get_user_data
+        ),
+        SwitchTo(Const('🔙 Назад'), id='back', state=adminSG.start),
+        state=adminSG.get_user_data
+    ),
+    Window(
+        Const('Введите кол-во 💎, которые вы хотите выдать'),
+        TextInput(
+            id='get_currency_amount',
+            on_success=getters.get_currency_amount
+        ),
+        SwitchTo(Const('🔙 Назад'), id='back_get_user_data', state=adminSG.get_user_data),
+        state=adminSG.get_currency_amount
     ),
     Window(
         Const('<b>Созданные тарифы: </b>'),

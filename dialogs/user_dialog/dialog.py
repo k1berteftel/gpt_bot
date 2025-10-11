@@ -21,9 +21,8 @@ user_dialog = Dialog(
         Column(
             SwitchTo(Const('👨‍🏫Cтудентам и школьникам'), id='students_menu_switcher', state=startSG.students_menu),
             SwitchTo(Const('👤Профиль'), id='profile_switcher', state=startSG.profile),
-            SwitchTo(Const('🎁Задания'), id='tasks_menu_swithcer', state=startSG.tasks_menu),
+            #SwitchTo(Const('🎁Задания'), id='tasks_menu_swithcer', state=startSG.tasks_menu),
             Start(Const('💰Пополнить баланс'), id='payment_menu', state=PaymentSG.choose_rate),
-            SwitchTo(Const('ℹ️Помощь'), id='help_switcher', state=startSG.help),
             Start(Const('Админ панель'), id='admin', state=adminSG.start, when='admin')
         ),
         getter=getters.start_getter,
@@ -61,8 +60,6 @@ user_dialog = Dialog(
         state=startSG.image_menu
     ),
     Window(
-        DynamicMedia('media', when='media'),
-        Format('{refer_text}'),
         Const('Отправьте промпт для генерации изображение'),
         Format('<em>Подсказка: {hint}</em>'),
         TextInput(
@@ -184,6 +181,7 @@ user_dialog = Dialog(
         Column(
             Url(Const('✈️Поделиться'), id='share_url', url=Format('{url}')),
             Start(Const('💰Пополнить баланс'), id='payment_menu', state=PaymentSG.choose_rate),
+            SwitchTo(Const('ℹ️Помощь'), id='help_switcher', state=startSG.help),
         ),
         SwitchTo(Const('⬅️Назад'), id='back', state=startSG.start),
         getter=getters.profile_getter,
@@ -191,9 +189,20 @@ user_dialog = Dialog(
     ),
     Window(
         Format('{text}'),
-        SwitchTo(Const('⬅️Назад'), id='back', state=startSG.start),
+        SwitchTo(Const('⬅️Назад'), id='back_profile', state=startSG.profile),
         getter=getters.help_getter,
         state=startSG.help
+    ),
+    Window(
+        DynamicMedia('media'),
+        Format('{text}'),
+        Column(
+            Button(Const('Начать генерацию'), id='start_generate_switcher', on_click=getters.balance_check_switcher),
+            Url(Const('Идея для генерации'), id='exemple_url', url=Format('{url}'))
+        ),
+        Button(Const('⬅️Назад'), id='back_choose_model', on_click=getters.back_choose_model),
+        getter=getters.example_menu_getter,
+        state=startSG.example_menu
     ),
     Window(
         Format('<b>❌ Не хватает алмазов!</b>\n💸 Ваш баланс: {balance} 💎\n\n<b>Для генерации нужно:</b>'

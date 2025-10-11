@@ -52,6 +52,37 @@ async def get_static(clb: CallbackQuery, widget: Button, dialog_manager: DialogM
     await clb.message.answer(text=text)
 
 
+async def get_user_data(msg: Message, widget: ManagedTextInput, dialog_manager: DialogManager, text: str):
+    session: DataInteraction = dialog_manager.middleware_data.get('session')
+    try:
+        user_id = int(text)
+        user = await session.get_user(user_id)
+    except Exception:
+        if not text.startswith('@'):
+            await msg.answer('Юзернейм должен начинаться с @ , пожалуйста попробуйте снова')
+            return
+        user = await session.get_user_by_username(text[1::])
+    if not user:
+        await msg.answer('Такого пользователя в боте не найдено, пожалуйста попробуйте еще раз')
+        return
+    dialog_manager.dialog_data['user_id'] = user.user_id
+    await dialog_manager.switch_to(adminSG.get_currency_amount)
+
+
+async def get_currency_amount(msg: Message, widget: ManagedTextInput, dialog_manager: DialogManager, text: str):
+    try:
+        amount = int(text)
+    except Exception:
+        await msg.answer('Кол-во 💎 должно быть числом, пожалуйста попробуйте еще раз')
+        return
+    session: DataInteraction = dialog_manager.middleware_data.get('session')
+    user_id = dialog_manager.dialog_data.get('user_id')
+    await session.update_balance(user_id, amount)
+    await msg.answer('Баланс был успешно обновлен')
+    dialog_manager.dialog_data.clear()
+    await dialog_manager.switch_to(adminSG.start)
+
+
 async def rate_menu_getter(dialog_manager: DialogManager, **kwargs):
     session: DataInteraction = dialog_manager.middleware_data.get('session')
     rates = await session.get_rates()

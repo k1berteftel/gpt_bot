@@ -15,7 +15,7 @@ from utils.wrapper_funcs import generate_wrapper
 from keyboards.keyboard import dialog_keyboard
 from database.action_data_class import DataInteraction
 from config_data.config import load_config, Config
-from datas.constants import prices, get_video_price, duration_prices, model_ratios
+from datas.constants import prices, get_video_price, duration_prices, model_ratios, model_examples
 from states.state_groups import startSG, DialogSG, PaymentSG
 
 
@@ -238,6 +238,7 @@ async def image_menu_getter(event_from_user: User, dialog_manager: DialogManager
 async def image_choose(clb: CallbackQuery, widget: Button, dialog_manager: DialogManager):
     model = clb.data.split('_')[0]
     dialog_manager.dialog_data['model'] = model
+    """
     mode = dialog_manager.dialog_data.get('mode')
     price = prices[mode][model]
     session: DataInteraction = dialog_manager.middleware_data.get('session')
@@ -248,7 +249,8 @@ async def image_choose(clb: CallbackQuery, widget: Button, dialog_manager: Dialo
     if not free and user.balance < price:
         await dialog_manager.switch_to(startSG.enough_balance)
         return
-    await dialog_manager.switch_to(startSG.get_image_prompt)
+    """
+    await dialog_manager.switch_to(startSG.example_menu)
 
 
 async def get_image_prompt_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
@@ -258,7 +260,7 @@ async def get_image_prompt_getter(event_from_user: User, dialog_manager: DialogM
     if model == 'text':
         hint = 'Отправьте текстовое описание картинки, которую вы хотели бы сгенерировать'
     else:
-        media = MediaAttachment(type=ContentType.PHOTO, path='media/image+photo_img.jpg')
+        media = MediaAttachment(type=ContentType.PHOTO, path='media/text+photo_img.jpg')
         refer_text = ('<b>Промпт:</b>\n<blockquote expandable>Создайте сцену в галерее современного искусства, '
                       'используя прилагаемое изображение лица и внешности девушки, не меняя её черты лица. '
                       'На стене висит большой портрет девушки маслом. Её лицо и верхняя часть тела написаны в '
@@ -386,15 +388,8 @@ async def video_choose(clb: CallbackQuery, widget: Button, dialog_manager: Dialo
     if model in ['seedance']:
         await dialog_manager.switch_to(startSG.video_model_menu)
         return
-    mode = dialog_manager.dialog_data.get('mode')
-    model = dialog_manager.dialog_data.get('model')
-    session: DataInteraction = dialog_manager.middleware_data.get('session')
-    user = await session.get_user(clb.from_user.id)
-    price = prices[mode][model]
-    if user.balance < price:
-        await dialog_manager.switch_to(startSG.enough_balance)
-        return
-    await dialog_manager.switch_to(startSG.get_video_prompt)
+
+    await dialog_manager.switch_to(startSG.example_menu)
 
 
 async def video_model_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
@@ -414,16 +409,7 @@ async def video_model_getter(event_from_user: User, dialog_manager: DialogManage
 
 async def sub_model_choose(clb: CallbackQuery, widget: Select, dialog_manager: DialogManager, item_id: str):
     dialog_manager.dialog_data['sub_model'] = item_id
-    session: DataInteraction = dialog_manager.middleware_data.get('session')
-    user = await session.get_user(clb.from_user.id)
-    mode = dialog_manager.dialog_data.get('mode')
-    model = dialog_manager.dialog_data.get('model')
-    sub_model = dialog_manager.dialog_data.get('sub_model')
-    price = prices[mode][model].get(sub_model) if sub_model else prices[mode][model]
-    if user.balance < price:
-        await dialog_manager.switch_to(startSG.enough_balance)
-        return
-    await dialog_manager.switch_to(startSG.get_video_prompt)
+    await dialog_manager.switch_to(startSG.example_menu)
 
 
 async def get_video_prompt_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
@@ -608,6 +594,30 @@ async def ratio_selector(clb: CallbackQuery, widget: Select, dialog_manager: Dia
     await dialog_manager.switch_to(startSG.get_video_prompt)
 
 
+async def example_menu_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
+    mode = dialog_manager.dialog_data.get('mode')
+    model = dialog_manager.dialog_data.get('model')
+    sub_model = dialog_manager.dialog_data.get('sub_model')
+    if model in ['seedance']:
+        data = model_examples[mode][model][sub_model]
+    else:
+        data = model_examples[mode][model]
+    media = MediaAttachment(type=data.get('media_type'), path=data.get('media'))
+    return {
+        'text': data.get('text'),
+        'media': media,
+        'url': data.get('url')
+    }
+
+
+async def back_choose_model(clb: CallbackQuery, widget: Button, dialog_manager: DialogManager):
+    mode = dialog_manager.dialog_data.get('mode')
+    if mode == 'image':
+        await dialog_manager.switch_to(startSG.image_menu)
+    else:
+        await dialog_manager.switch_to(startSG.video_menu)
+
+
 async def balance_check_switcher(clb: CallbackQuery, widget: Button, dialog_manager: DialogManager):
     session: DataInteraction = dialog_manager.middleware_data.get('session')
     user = await session.get_user(clb.from_user.id)
@@ -621,7 +631,7 @@ async def balance_check_switcher(clb: CallbackQuery, widget: Button, dialog_mana
     mode = dialog_manager.dialog_data.get('mode')
     model = dialog_manager.dialog_data.get('model')
     print(mode, model)
-    if switcher == 'image':
+    if mode == 'image':
         price = prices[mode][model]
     else:
         sub_model = dialog_manager.dialog_data.get('sub_model')
@@ -632,7 +642,7 @@ async def balance_check_switcher(clb: CallbackQuery, widget: Button, dialog_mana
     if not free and user.balance < price:
         await dialog_manager.switch_to(startSG.enough_balance)
         return
-    if switcher == 'image':
+    if mode == 'image':
         await dialog_manager.switch_to(startSG.get_image_prompt)
     else:
         await dialog_manager.switch_to(startSG.get_video_prompt)

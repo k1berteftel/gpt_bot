@@ -10,6 +10,8 @@ class DialogSG(StatesGroup):
 class startSG(StatesGroup):
     start = State()
 
+    example_menu = State()
+
     students_menu = State()
     get_task_photo = State()
 
@@ -68,3 +70,6 @@ class adminSG(StatesGroup):
     button_menu = State()
     change_button_text = State()
     change_button_link = State()
+
+    get_user_data = State()
+    get_currency_amount = State()
