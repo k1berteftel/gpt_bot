@@ -74,20 +74,20 @@ model_examples = {
                     'shaky, casually composed, and emotionally genuine</blockquote>',
             'media_type': 'video',
             'media': 'media/video_gen/kling.MP4',
-            'url': 'https://t.me/kling_promt2025'
+            'url': 'https://t.me/pakrnet'
         },
         'seedance': {
             'lite': {
                 'text': '<b>Промпт:</b>\n<blockquote expandable> Семья улыбается и машет рукой</blockquote>',
                 'media': 'media/video_gen/seedance_video.mp4',
                 'media_type': 'video',
-                'url': 'https://t.me/seedance25'
+                'url': 'https://t.me/pakrnet'
             },
             'pro': {
                 'text': '<b>Промпт:</b>\n<blockquote expandable> Семья улыбается и машет рукой</blockquote>',
                 'media': 'media/video_gen/seedance_video.mp4',
                 'media_type': 'video',
-                'url': 'https://t.me/seedance25'
+                'url': 'https://t.me/pakrnet'
             }
         }
     }
