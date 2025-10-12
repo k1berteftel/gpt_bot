@@ -78,13 +78,13 @@ model_examples = {
         },
         'seedance': {
             'lite': {
-                'text': '<b>Промпт:</b>\n<blockquote expandable> Семья улыбается и машет рукой</blockquote>',
+                'text': '<b>Промпт:</b>\n<blockquote expandable>Пусть Этот человек моргнет, и улыбнется</blockquote>',
                 'media': 'media/video_gen/seedance_video.mp4',
                 'media_type': 'video',
                 'url': 'https://t.me/pakrnet'
             },
             'pro': {
-                'text': '<b>Промпт:</b>\n<blockquote expandable> Семья улыбается и машет рукой</blockquote>',
+                'text': '<b>Промпт:</b>\n<blockquote expandable>Пусть Этот человек моргнет, и улыбнется</blockquote>',
                 'media': 'media/video_gen/seedance_video.mp4',
                 'media_type': 'video',
                 'url': 'https://t.me/pakrnet'

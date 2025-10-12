@@ -94,7 +94,7 @@ async def get_task_prompt(msg: Message, widget: MessageInput, dialog_manager: Di
         await msg.answer('🚨Во время генерации произошла какая-то ошибка')
         return
     message = await msg.answer_photo(
-        photo=result,
+        photo=result
     )
     await session.update_balance(msg.from_user.id, -price)
     await session.update_gens(msg.from_user.id)
@@ -254,27 +254,21 @@ async def image_choose(clb: CallbackQuery, widget: Button, dialog_manager: Dialo
 
 
 async def get_image_prompt_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
+    session: DataInteraction = dialog_manager.middleware_data.get('session')
     model = dialog_manager.dialog_data.get('model')
-    media = None
-    refer_text = ''
+    mode = dialog_manager.dialog_data.get('mode')
+    price = prices[mode][model]
+    user = await session.get_user(event_from_user.id)
+    free = False
+    if model == 'text' and (not user.last_generate or user.last_generate < datetime.datetime.now() - datetime.timedelta(days=1)):
+        free = True
     if model == 'text':
         hint = 'Отправьте текстовое описание картинки, которую вы хотели бы сгенерировать'
     else:
-        media = MediaAttachment(type=ContentType.PHOTO, path='media/text+photo_img.jpg')
-        refer_text = ('<b>Промпт:</b>\n<blockquote expandable>Создайте сцену в галерее современного искусства, '
-                      'используя прилагаемое изображение лица и внешности девушки, не меняя её черты лица. '
-                      'На стене висит большой портрет девушки маслом. Её лицо и верхняя часть тела написаны в '
-                      'реалистичной, экспрессивной манере масляной живописи с текстурированными мазками и '
-                      'приглушенными цветами.\nЧистая красная стена галереи создает профессиональную атмосферу '
-                      'выставки благодаря мягкому освещению, освещающему произведение искусства.\nПеред картиной '
-                      'в тёмно-зелёном кресле, видимом сзади, сидит её бывший парень, держа в руке сигарету, '
-                      'из которой поднимается тонкий дымок, что придаёт сцене кинематографическое и таинственное '
-                      'настроение</blockquote>\n')
         hint = 'Отправьте фото и к нему текстовое описание изменений, которые вы хотели бы произвести с этим фото'
     return {
-        'media': media,
-        'refer_text': refer_text,
-        'hint': hint
+        'hint': hint,
+        'cost': price if not free else 'Бесплатно'
     }
 
 
@@ -315,7 +309,7 @@ async def get_image_text(msg: Message, widget: ManagedTextInput, dialog_manager:
     model = dialog_manager.dialog_data.get('model')
     price = prices[mode][model]
     user = await session.get_user(msg.from_user.id)
-    if not user.last_generate or user.last_generate < datetime.datetime.now() - datetime.timedelta(days=1):
+    if model == 'text' and (not user.last_generate or user.last_generate < datetime.datetime.now() - datetime.timedelta(days=1)):
         await session.update_last_generate(user.user_id, datetime.datetime.now())
     else:
         await session.update_balance(msg.from_user.id, -price)
@@ -332,8 +326,13 @@ async def get_image_prompt(msg: Message, widget: MessageInput, dialog_manager: D
         await msg.answer('❗️Отправьте пожалуйста только текстовый промпт')
         return
     session: DataInteraction = dialog_manager.middleware_data.get('session')
-    text = msg.caption
-    images = await save_bot_files(msg.photo, msg.bot)
+    album: list[Message] = dialog_manager.middleware_data.get('album')
+    if len(album) > 1:
+        text = album[0].caption
+        images = await save_bot_files(album, msg.bot)
+    else:
+        text = msg.caption
+        images = await save_bot_files([msg], msg.bot)
     result = await generate_wrapper(
         generate_image,
         msg.bot,
@@ -414,6 +413,9 @@ async def sub_model_choose(clb: CallbackQuery, widget: Select, dialog_manager: D
 
 async def get_video_prompt_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
     model = dialog_manager.dialog_data.get('model')
+    sub_model = dialog_manager.dialog_data.get('sub_model')
+    if model in ['seedance']:
+        model = model + "_" + sub_model
     params = dialog_manager.dialog_data.get('params')
     if not params and model in duration_prices.keys():
         params = {
@@ -425,8 +427,8 @@ async def get_video_prompt_getter(event_from_user: User, dialog_manager: DialogM
     if params:
         params['price'] = get_video_price(dialog_manager.dialog_data)
         dialog_manager.dialog_data['params'] = params
-        params_text = (f' - Соотношение сторон: <b>{params.get("duration")}</b>\n - Длительность: '
-                       f'<b>{params.get("aspect_ratio")} сек</b>\n - Стоимость: <b>{params.get("price")} 💎</b>')
+        params_text = (f' - Соотношение сторон: <b>{params.get("aspect_ratio")}</b>\n - Длительность: '
+                       f'<b>{params.get("duration")} сек</b>\n - Стоимость: <b>{params.get("price")} 💎</b>')
     if model == 'seedance':
         hint = 'Отправьте текстовый сценарий видео, которое вы хотели бы сгенерировать'
     else:
@@ -588,7 +590,7 @@ async def ratio_choose_getter(event_from_user: User, dialog_manager: DialogManag
 
 async def ratio_selector(clb: CallbackQuery, widget: Select, dialog_manager: DialogManager, item_id: str):
     params = dialog_manager.dialog_data.get('params')
-    ratio = int(item_id)
+    ratio = item_id
     params['aspect_ratio'] = ratio
     dialog_manager.dialog_data['params'] = params
     await dialog_manager.switch_to(startSG.get_video_prompt)
@@ -622,20 +624,24 @@ async def balance_check_switcher(clb: CallbackQuery, widget: Button, dialog_mana
     session: DataInteraction = dialog_manager.middleware_data.get('session')
     user = await session.get_user(clb.from_user.id)
     switcher = clb.data.split('_')[0]
+    print(switcher)
     if switcher == 'task':
         if user.balance < prices['task']:
             dialog_manager.dialog_data['mode'] = switcher
             await dialog_manager.switch_to(startSG.enough_balance)
             return
         await dialog_manager.switch_to(startSG.get_task_photo)
+        return
     mode = dialog_manager.dialog_data.get('mode')
     model = dialog_manager.dialog_data.get('model')
-    print(mode, model)
     if mode == 'image':
         price = prices[mode][model]
     else:
         sub_model = dialog_manager.dialog_data.get('sub_model')
-        price = prices[mode][model].get(sub_model) if sub_model else prices[mode][model]
+        if model in ['seedance']:
+            price = prices[mode][model].get(sub_model)
+        else:
+            price = prices[mode][model]
     free = False
     if model == 'text' and (not user.last_generate or user.last_generate < datetime.datetime.now() - datetime.timedelta(days=1)):
         free = True

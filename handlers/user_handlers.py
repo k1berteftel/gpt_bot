@@ -1,3 +1,5 @@
+import os
+
 from aiogram import Router, F, Bot
 from aiogram.filters import CommandStart, CommandObject
 from aiogram.types import Message, CallbackQuery
@@ -7,12 +9,16 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from keyboards.keyboard import dialog_keyboard
 from utils.wrapper_funcs import generate_wrapper
-from utils.ai_funcs import get_text_answer, get_assistant_and_thread
+from utils.ai_funcs import get_text_answer, get_assistant_and_thread, generate_image
+from utils.images_funcs import save_bot_files
 from database.action_data_class import DataInteraction
 from states.state_groups import startSG, DialogSG
+from datas.constants import prices
+from config_data.config import Config, load_config
 
 
 user_router = Router()
+config: Config = load_config()
 
 
 @user_router.message(CommandStart())

@@ -60,8 +60,9 @@ user_dialog = Dialog(
         state=startSG.image_menu
     ),
     Window(
-        Const('Отправьте промпт для генерации изображение'),
-        Format('<em>Подсказка: {hint}</em>'),
+        Const('📝 Отправьте промпт для генерации изображения\n'),
+        Format('<b>💡Подсказка: {hint}</b>\n'),
+        Format('Стоимость: <b>{cost}</b> 💎'),
         TextInput(
             id='get_image_text',
             on_success=getters.get_image_text
@@ -105,8 +106,8 @@ user_dialog = Dialog(
         state=startSG.video_model_menu
     ),
     Window(
-        Const('Отправьте промпт для генерации видео\n'),
-        Format('<em>Подсказка: {hint}</em>\n'),
+        Const('📝Отправьте промпт для генерации видео\n'),
+        Format('<b>💡Подсказка:</b> {hint}\n'),
         Format('{params}'),
         TextInput(
             id='get_video_text',
@@ -181,17 +182,11 @@ user_dialog = Dialog(
         Column(
             Url(Const('✈️Поделиться'), id='share_url', url=Format('{url}')),
             Start(Const('💰Пополнить баланс'), id='payment_menu', state=PaymentSG.choose_rate),
-            SwitchTo(Const('ℹ️Помощь'), id='help_switcher', state=startSG.help),
+            Url(Const('ℹ️Помощь'), id='help_url', url=Const('https://t.me/ultragptsupport_bot')),
         ),
         SwitchTo(Const('⬅️Назад'), id='back', state=startSG.start),
         getter=getters.profile_getter,
         state=startSG.profile
-    ),
-    Window(
-        Format('{text}'),
-        SwitchTo(Const('⬅️Назад'), id='back_profile', state=startSG.profile),
-        getter=getters.help_getter,
-        state=startSG.help
     ),
     Window(
         DynamicMedia('media'),

@@ -21,7 +21,7 @@ from config_data.config import load_config, Config
 from handlers.user_handlers import user_router
 from handlers.payment_handlers import payment_router
 from dialogs import get_dialogs
-from middlewares import TransferObjectsMiddleware, RemindMiddleware, OpMiddleware
+from middlewares import TransferObjectsMiddleware, RemindMiddleware, OpMiddleware, AlbumMiddleware
 
 
 timezone = pytz.timezone('Europe/Moscow')
@@ -70,6 +70,7 @@ async def main():
     dp.include_routers(user_router, payment_router, *get_dialogs())
 
     # подключаем middleware
+    dp.message.middleware(AlbumMiddleware())
     dp.update.middleware(TransferObjectsMiddleware())
     dp.callback_query.middleware(OpMiddleware())
     dp.update.middleware(RemindMiddleware())

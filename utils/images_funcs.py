@@ -8,7 +8,7 @@ import aiohttp
 import aiofiles
 
 from aiogram import Bot
-from aiogram.types import PhotoSize
+from aiogram.types import PhotoSize, Message
 
 from utils.build_ids import get_random_id
 from config_data.config import Config, load_config
@@ -60,11 +60,12 @@ async def image_to_url(photo: PhotoSize, bot: Bot) -> str:
             os.remove(temp_photo_path)
 
 
-async def save_bot_files(photos: list[PhotoSize], bot: Bot):
+async def save_bot_files(msgs: list[Message], bot: Bot):
     if not os.path.exists('download'):
         os.mkdir('download')
     files = []
-    for photo in photos:
+    for msg in msgs:
+        photo = msg.photo[-1]
         temp_photo_path = f"download/temp_{photo.file_unique_id}.jpg"
         try:
             await bot.download(file=photo.file_id, destination=temp_photo_path)
@@ -73,6 +74,7 @@ async def save_bot_files(photos: list[PhotoSize], bot: Bot):
         except Exception as err:
             logging.warning(f"Не удалось загрузить на ImgBB файл: {temp_photo_path}\n{err}")
     return files
+
 
 async def file_to_url(file_path: str):
     return await _upload_image_to_imgbb(file_path)
