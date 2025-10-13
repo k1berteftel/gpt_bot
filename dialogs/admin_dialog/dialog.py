@@ -114,7 +114,7 @@ admin_dialog = Dialog(
         Column(
             Button(Const('🗑Удалить диплинк'), id='del_deeplink', on_click=getters.del_deeplink),
         ),
-        SwitchTo(Const('🔙 Назад'), id='back_deeplinks_menu', state=adminSG.deeplink_menu),
+        SwitchTo(Const('🔙 Назад'), id='back_deeplinks_menu', state=adminSG.deeplinks_menu),
         getter=getters.deeplink_menu_getter,
         state=adminSG.deeplink_menu
     ),
