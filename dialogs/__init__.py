@@ -5,4 +5,4 @@ from dialogs.sub_dialog.dialog import sub_dialog
 
 
 def get_dialogs():
-    return [user_dialog, payment_dialog, admin_dialog]
+    return [user_dialog, payment_dialog, sub_dialog, admin_dialog]

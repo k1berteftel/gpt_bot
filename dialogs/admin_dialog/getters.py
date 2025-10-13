@@ -332,6 +332,7 @@ async def button_menu_getter(dialog_manager: DialogManager, **kwargs):
     chat_id = dialog_manager.dialog_data.get('chat_id')
     button = await session.get_op_by_chat_id(chat_id)
     return {
+        'join': button.entry,
         'channel_name': button.name,
         'channel_link': button.link
     }
@@ -361,7 +362,7 @@ async def op_menu_getter(dialog_manager: DialogManager, **kwargs):
     count = 1
     for category in categories:
         buttons.append((category.name, category.chat_id))
-        text += f'{count}: {category.name} - {category.link}/{category.entry} вхождений\n'
+        text += f'{count}: {category.name} - {category.link} | {category.entry} вхождений\n'
         count += 1
     return {
         'buttons': text,
@@ -392,7 +393,6 @@ async def get_op_channel(msg: Message, widget: ManagedTextInput, dialog_manager:
         return
     dialog_manager.dialog_data['chat_id'] = chat.id
     await dialog_manager.switch_to(adminSG.get_button_link)
-
 
 
 async def get_mail(msg: Message, widget: MessageInput, dialog_manager: DialogManager):

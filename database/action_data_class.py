@@ -197,7 +197,7 @@ class DataInteraction():
 
     async def update_op_entry(self, op_id: int):
         async with self._sessions() as session:
-            await session.execute(update(OpTable).values(OpTable.id == op_id).values(
+            await session.execute(update(OpTable).where(OpTable.id == op_id).values(
                 entry=OpTable.entry + 1
             ))
             await session.commit()

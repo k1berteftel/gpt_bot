@@ -178,9 +178,21 @@ admin_dialog = Dialog(
         state=adminSG.get_op_channel
     ),
     Window(
-        Format('Канал|Чат {channel_name}\nУказанная ссылка на канал|чат: {channel_link}'),
-        SwitchTo(Const('Изменить ссылку на канал'), id='change_button_link_switcher', state=adminSG.change_button_link),
-        Button(Const('➖Удалить канал с ОП'), id='del_op_channel', on_click=getters.del_op_channel),
+        Const('🔗 Введите свою ссылку на канал или пропустите этот шаг, '
+              'чтобы бот сам подобрал ссылку для канала или чата'),
+        TextInput(
+            id='get_button_link',
+            on_success=getters.get_button_link
+        ),
+        Button(Const('⏭ Пропустить'), id='continue_no_link', on_click=getters.save_without_link),
+        state=adminSG.get_button_link
+    ),
+    Window(
+        Format('Канал|Чат {channel_name}\nУказанная ссылка на канал|чат: {channel_link}\nВхождений: {join}'),
+        Column(
+            SwitchTo(Const('Изменить ссылку на канал'), id='change_button_link_switcher', state=adminSG.change_button_link),
+            Button(Const('➖Удалить канал с ОП'), id='del_op_channel', on_click=getters.del_op_channel),
+        ),
         SwitchTo(Const('Назад'), id='back_op_menu', state=adminSG.op_menu),
         getter=getters.button_menu_getter,
         state=adminSG.button_menu

@@ -601,14 +601,22 @@ async def example_menu_getter(event_from_user: User, dialog_manager: DialogManag
     model = dialog_manager.dialog_data.get('model')
     sub_model = dialog_manager.dialog_data.get('sub_model')
     if model in ['seedance']:
+        price = prices[mode][model].get(sub_model)
         data = model_examples[mode][model][sub_model]
     else:
+        price = prices[mode][model]
         data = model_examples[mode][model]
     media = MediaAttachment(type=data.get('media_type'), path=data.get('media'))
+    session: DataInteraction = dialog_manager.middleware_data.get('session')
+    user = await session.get_user(event_from_user.id)
+    free = False
+    if model == 'text' and (not user.last_generate or user.last_generate < datetime.datetime.now() - datetime.timedelta(days=1)):
+        free = True
     return {
         'text': data.get('text'),
         'media': media,
-        'url': data.get('url')
+        'url': data.get('url'),
+        'cost': price if not free else 'Бесплатно'
     }
 
 

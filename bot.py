@@ -48,7 +48,7 @@ config: Config = load_config()
 async def main():
     database = PostgresBuild(config.db.dns)
     #await database.clear_all()
-    await database.drop_tables(Base)
+    #await database.drop_tables(Base)
     await database.create_tables(Base)
     session = database.session()
     await configurate_tables(session)
@@ -69,6 +69,7 @@ async def main():
     # подключаем роутеры
     dp.include_routers(user_router, payment_router, *get_dialogs())
 
+    setup_dialogs(dp)
     # подключаем middleware
     dp.message.middleware(AlbumMiddleware())
     dp.update.middleware(TransferObjectsMiddleware())
@@ -77,7 +78,6 @@ async def main():
 
     # запуск
     await bot.delete_webhook(drop_pending_updates=True)
-    setup_dialogs(dp)
     logger.info('Bot start polling')
 
     try:

@@ -190,7 +190,8 @@ user_dialog = Dialog(
     ),
     Window(
         DynamicMedia('media'),
-        Format('{text}'),
+        Format('{text}\n'),
+        Format('Стоимость: {cost} 💎'),
         Column(
             Button(Const('😃Начать генерацию'), id='start_generate_switcher', on_click=getters.balance_check_switcher),
             Url(Const('💡Идея для генерации'), id='exemple_url', url=Format('{url}'))
