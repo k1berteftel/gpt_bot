@@ -95,7 +95,7 @@ admin_dialog = Dialog(
             Button(Format('{page}'), id='deeplinks_pager', when='deeplinks'),
             Button(Const('▶️'), id='next_deeplinks_pager', on_click=getters.deeplinks_pager, when='not_last')
         ),
-        SwitchTo(Const('➕ Добавить диплинк'), id='add_deeplink', state=adminSG.get_deeplink_name, on_click=getters.add_deeplink),
+        SwitchTo(Const('➕ Добавить диплинк'), id='add_deeplink', state=adminSG.get_deeplink_name),
         SwitchTo(Const('🔙 Назад'), id='back', state=adminSG.start),
         getter=getters.deeplinks_menu_getter,
         state=adminSG.deeplinks_menu
