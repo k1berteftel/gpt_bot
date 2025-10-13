@@ -679,13 +679,6 @@ async def profile_getter(event_from_user: User, dialog_manager: DialogManager, *
     }
 
 
-async def help_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
-    text = '...'
-    return {
-        'text': text
-    }
-
-
 async def enough_balance_getter(event_from_user: User, dialog_manager: DialogManager, **kwargs):
     session: DataInteraction = dialog_manager.middleware_data.get('session')
     user = await session.get_user(event_from_user.id)

@@ -66,6 +66,7 @@ class adminSG(StatesGroup):
 
     op_menu = State()
     get_op_channel = State()
+    get_button_name = State()
     get_button_link = State()
     button_menu = State()
     change_button_text = State()

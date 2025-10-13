@@ -289,14 +289,28 @@ async def admin_menu_getter(dialog_manager: DialogManager, **kwargs):
     return {'admins': text}
 
 
+async def get_button_name(msg: Message, widget: ManagedTextInput, dialog_manager: DialogManager, text: str):
+    dialog_manager.dialog_data['name'] = text
+    await dialog_manager.switch_to(adminSG.get_button_link)
+
+
+async def save_without_name(clb: CallbackQuery, widget: Button, dialog_manager: DialogManager):
+    bot: Bot = dialog_manager.middleware_data.get('bot')
+    chat_id = dialog_manager.dialog_data.get('chat_id')
+    chat = await bot.get_chat(chat_id)
+    dialog_manager.dialog_data['name'] = chat.title
+    await dialog_manager.switch_to(adminSG.get_button_link)
+
+
 async def save_without_link(clb: CallbackQuery, widget: Button, dialog_manager: DialogManager):
     bot: Bot = dialog_manager.middleware_data.get('bot')
     session: DataInteraction = dialog_manager.middleware_data.get('session')
     chat_id = dialog_manager.dialog_data.get('chat_id')
+    name = dialog_manager.dialog_data.get('name')
     chat = await bot.get_chat(chat_id)
     await session.add_op(
         chat_id=chat_id,
-        name=chat.title,
+        name=name,
         link=chat.invite_link,
     )
     await clb.answer('Кнопка на ОП была успешно сохранена')
@@ -311,10 +325,10 @@ async def get_button_link(msg: Message, widget: ManagedTextInput, dialog_manager
     session: DataInteraction = dialog_manager.middleware_data.get('session')
     bot: Bot = dialog_manager.middleware_data.get('bot')
     chat_id = dialog_manager.dialog_data.get('chat_id')
-    chat = await bot.get_chat(chat_id)
+    name = dialog_manager.dialog_data.get('name')
     await session.add_op(
         chat_id=chat_id,
-        name=chat.title,
+        name=name,
         link=text,
     )
     await msg.answer('Кнопка на ОП была успешно сохранена')
@@ -392,7 +406,7 @@ async def get_op_channel(msg: Message, widget: ManagedTextInput, dialog_manager:
         await msg.answer('Этот канал уже добавлен на ОП, чтобы добавить его повторно удалите его')
         return
     dialog_manager.dialog_data['chat_id'] = chat.id
-    await dialog_manager.switch_to(adminSG.get_button_link)
+    await dialog_manager.switch_to(adminSG.get_button_name)
 
 
 async def get_mail(msg: Message, widget: MessageInput, dialog_manager: DialogManager):

@@ -178,6 +178,15 @@ admin_dialog = Dialog(
         state=adminSG.get_op_channel
     ),
     Window(
+        Const('Введите название для кнопки канал или нажмите пропустить, чтобы бот сам подобрал название для канала'),
+        TextInput(
+            id='get_button_name',
+            on_success=getters.get_button_name
+        ),
+        Button(Const('⏭ Пропустить'), id='continue_no_name', on_click=getters.save_without_name),
+        state=adminSG.get_button_name
+    ),
+    Window(
         Const('🔗 Введите свою ссылку на канал или пропустите этот шаг, '
               'чтобы бот сам подобрал ссылку для канала или чата'),
         TextInput(
