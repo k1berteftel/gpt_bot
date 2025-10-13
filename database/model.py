@@ -34,6 +34,7 @@ class DeeplinksTable(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
 
+    name: Mapped[str] = mapped_column(VARCHAR)
     link: Mapped[str] = mapped_column(VARCHAR)
     entry: Mapped[int] = mapped_column(BigInteger, default=0)
     income: Mapped[int] = mapped_column(Integer, default=0)

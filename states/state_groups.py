@@ -58,6 +58,7 @@ class adminSG(StatesGroup):
     del_rate = State()
 
     deeplinks_menu = State()
+    get_deeplink_name = State()
     deeplink_menu = State()
 
     admin_menu = State()

@@ -61,7 +61,7 @@ class DataInteraction():
             ))
             await session.commit()
 
-    async def add_deeplink(self, link: str):
+    async def add_deeplink(self, link: str, name: str):
         async with self._sessions() as session:
             await session.execute(insert(DeeplinksTable).values(
                 link=link

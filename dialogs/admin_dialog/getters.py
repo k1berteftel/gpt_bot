@@ -146,7 +146,7 @@ async def deeplinks_menu_getter(dialog_manager: DialogManager, **kwargs):
     buttons = dialog_manager.dialog_data.get('deeplinks')
     if not buttons:
         links = await session.get_deeplinks()
-        buttons = [(f'{link.link} ({link.entry})', link.id) for link in links]
+        buttons = [(f'{link.name} ({link.entry})', link.id) for link in links]
         buttons = [buttons[i:i + 10] for i in range(0, len(buttons), 10)]
         dialog_manager.dialog_data['deeplinks'] = buttons
     page = dialog_manager.dialog_data.get('page')
@@ -179,11 +179,11 @@ async def deeplinks_pager(clb: CallbackQuery, widget: Button, dialog_manager: Di
     await dialog_manager.switch_to(adminSG.deeplinks_menu)
 
 
-async def add_deeplink(clb: CallbackQuery, widget: Button, dialog_manager: DialogManager):
+async def get_deeplink_name(msg: Message, widget: ManagedTextInput, dialog_manager: DialogManager, text: str):
     session: DataInteraction = dialog_manager.middleware_data.get('session')
-    await session.add_deeplink(get_random_id())
+    await session.add_deeplink(get_random_id(), text)
     links = await session.get_deeplinks()
-    buttons = [(f'{link.link} ({link.entry})', link.id) for link in links]
+    buttons = [(f'{link.name} ({link.entry})', link.id) for link in links]
     buttons = [buttons[i:i + 10] for i in range(0, len(buttons), 10)]
     print(buttons)
     dialog_manager.dialog_data['deeplinks'] = buttons
@@ -222,7 +222,7 @@ async def deeplink_menu_getter(dialog_manager: DialogManager, **kwargs):
         if user.activity.timestamp() > (datetime.datetime.today() - datetime.timedelta(days=1)).timestamp():
             activity += 1
 
-    text = (f'<b>🗓 Cоздано: {datetime.datetime.today().strftime("%d-%m-%Y")}</b>\n\nОбщее:\nВсего: {len(users)}'
+    text = (f'<b>({deeplink.name}) 🗓 Cоздано: {datetime.datetime.today().strftime("%d-%m-%Y")}</b>\n\nОбщее:\nВсего: {len(users)}'
             f'\n - Активны: {active}\n - Заблокировали бота: {len(users) - active}\n'
             f' - Заходили в бота последние сутки: {activity}\n\nРост:\n - За сегодня: +{entry.get("today")}\n'
             f' - Вчера: +{entry.get("yesterday")}\n - Позавчера: + {entry.get("2_day_ago")}\n\nЗаработано:\n'
@@ -239,7 +239,7 @@ async def del_deeplink(clb: CallbackQuery, widget: Button, dialog_manager: Dialo
     await clb.answer('Данный диплинк был успешно удален')
 
     links = await session.get_deeplinks()
-    buttons = [(f'{link.link} ({link.entry})', link.id) for link in links]
+    buttons = [(f'{link.name} ({link.entry})', link.id) for link in links]
     buttons = [buttons[i:i + 10] for i in range(0, len(buttons), 10)]
 
     dialog_manager.dialog_data['deeplinks'] = buttons
