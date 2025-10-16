@@ -17,28 +17,28 @@ config: Config = load_config()
 
 
 async def _upload_image_to_imgbb(image_path: str) -> str | None:
-    with open(image_path, 'rb') as image_file:
-        encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
+    url = 'https://files.storagecdn.online/upload'
 
-    data = {
-        'key': config.imgBB.api_key,
-        'image': encoded_image,
+    data = aiohttp.FormData()
+    data.add_field('file',
+                   open(image_path, 'rb'),
+                   filename=Path(image_path).name,
+                   content_type='application/octet-stream')
+
+    headers = {
+        'Authorization': f'Bearer {config.unifically.api_token}'
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.post("https://api.imgbb.com/1/upload", data=data, ssl=False) as response:
-            if response.status == 200:
-                response_data = await response.json()
-                image_url = response_data['data']['url']
-                logging.info(f"Изображение успешно загружено на ImgBB: {image_url}")
-                return image_url
-            else:
-                try:
-                    response_data = await response.json()
-                    logging.error(f"Ошибка загрузки на ImgBB: {response_data}")
-                except aiohttp.ContentTypeError:
-                    logging.error(f"Ошибка загрузки на ImgBB: {response.status} {await response.text()}")
+        async with session.put(url, data=data, headers=headers, ssl=False) as response:
+            if response.status not in [200, 201]:
+                print(await response.text())
                 return None
+            data = await response.json()
+            if data['success'] != True:
+                print(data['message'])
+                return None
+    return data['file_url']
 
 
 async def image_to_url(photo: PhotoSize, bot: Bot) -> str:
