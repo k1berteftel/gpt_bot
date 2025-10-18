@@ -98,7 +98,7 @@ async def download_and_upload_images(
             continue
 
         photo_obj = msg.photo[-1]
-        temp_photo_path = f"temp_{photo_obj.file_unique_id}.jpg"
+        temp_photo_path = f"download/temp_{photo_obj.file_unique_id}.jpg"
 
         try:
             await bot.download(file=photo_obj.file_id, destination=temp_photo_path)
