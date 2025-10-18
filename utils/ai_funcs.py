@@ -193,7 +193,7 @@ async def _polling_unifically_generate(data: dict) -> list[str] | dict:
             if data['data']['status'] == 'failed':
                 return {'error': data['data']['error']['message']}
             if data['data']['status'] == 'completed':
-                return [data['data']['output']['image_url']]
+                return data['data']['output']['image_url']
             await asyncio.sleep(4)
 
 
@@ -220,7 +220,7 @@ async def generate_image_by_unifically(prompt: str, photos: list[str]) -> list[s
         if data['code'] != 200:
             return {'error': data['data']['error']['message']}
         if data['data'].get('output'):
-            return [data['data']['output']['image_url']]
+            return data['data']['output']['image_url']
     return await _polling_unifically_generate(data)
 
 
@@ -249,7 +249,7 @@ async def _polling_veo_generate(req_id: str) -> list[str] | dict:
                         os.remove(file_path)
                     if not file_url:
                         return {'error': "ImgBB error"}
-                    return [file_url]
+                    return file_url
             logger.info(f'Polling retry: {counter}')
             counter += 1
             await asyncio.sleep(3)
