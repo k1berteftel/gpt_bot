@@ -7,10 +7,12 @@ import logging
 import uuid
 from pathlib import Path
 
+from aiogram import Bot
+from aiogram.types import Message
 from openai import AsyncOpenAI
 from openai.types.beta.threads.message_content_part_param import MessageContentPartParam
 
-from utils.images_funcs import save_image, file_to_url
+from utils.images_funcs import save_image, file_to_url, save_bot_files, download_and_upload_images
 from config_data.config import Config, load_config
 
 config: Config = load_config()
@@ -139,15 +141,97 @@ async def generate_on_api(params: dict) -> str:
             await asyncio.sleep(4)
 
 
-#"""
-async def _polling_image_generate(req_id: str) -> str | dict:
+counter = 1
+
+
+async def generate_division(prompt: str, bot: Bot, photos: list[Message] | None = None) -> str | dict:
+    global counter
+    images = []
+    #if counter % 2 == 0:
+    if photos:
+        images = await download_and_upload_images(bot, photos)
+    result = await generate_image_by_unifically(prompt, images)
+    if isinstance(result, dict):
+        if photos:
+            images = await save_bot_files(photos, bot)
+        result = await generate_image_by_veo(prompt, images)
+        for image in images:
+            if os.path.exists(image):
+                os.remove(image)
+    return result
+"""
+    else:
+        if photos:
+            images = await save_bot_files(photos, bot)
+        result = await generate_image_by_veo(prompt, images)
+        for image in images:
+            if os.path.exists(image):
+                os.remove(image)
+        if isinstance(result, dict):
+            if photos:
+                images = await download_and_upload_images(bot, photos)
+            result = await generate_image_by_unifically(prompt, images)
+    counter += 1
+    return result
+"""
+
+
+async def _polling_unifically_generate(data: dict) -> list[str] | dict:
+    url = f'https://api.unifically.com/nano-banana/status/{data["data"]["task_id"]}'
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {config.unifically.api_token}'
+    }
+    async with aiohttp.ClientSession() as client:
+        while True:
+            async with client.get(url, headers=headers, ssl=False) as response:
+                if response.status not in [200, 201]:
+                    data = await response.json()
+                    return {'error': data['data']['error']['message']}
+                data = await response.json()
+                print(data)
+            if data['data']['status'] == 'failed':
+                return {'error': data['data']['error']['message']}
+            if data['data']['status'] == 'completed':
+                return [data['data']['output']['image_url']]
+            await asyncio.sleep(4)
+
+
+async def generate_image_by_unifically(prompt: str, photos: list[str]) -> list[str] | dict:
+    url = f'https://api.unifically.com/nano-banana/generate'
+    #prompt = await translate_text(prompt)
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {config.unifically.api_token}'
+    }
+    data = {
+      "prompt": prompt,
+    }
+    if photos:
+        data["image_urls"] = photos
+    async with aiohttp.ClientSession() as client:
+        async with client.post(url, headers=headers, json=data, ssl=False) as response:
+            print(response.status)
+            if response.status not in [200, 201]:
+                data = await response.json()
+                return {'error': data['data']['error']['message']}
+            data = await response.json()
+            print(data)
+        if data['code'] != 200:
+            return {'error': data['data']['error']['message']}
+        if data['data'].get('output'):
+            return [data['data']['output']['image_url']]
+    return await _polling_unifically_generate(data)
+
+
+async def _polling_veo_generate(req_id: str) -> list[str] | dict:
     url = f'http://95.164.55.41:8765/v1/gemini/image-status/{req_id}'
     headers = {'Authorization': f'Bearer {config.veo.api_key}'}
     logger.info('Start image generate polling')
     async with aiohttp.ClientSession() as session:
         counter = 1
         while True:
-            async with session.get(url, headers=headers) as response:
+            async with session.get(url, headers=headers, ssl=False) as response:
                 if response.status not in [200, 201]:
                     return {'error': f"Request status code {response.status}"}
                 data = await response.json()
@@ -165,13 +249,13 @@ async def _polling_image_generate(req_id: str) -> str | dict:
                         os.remove(file_path)
                     if not file_url:
                         return {'error': "ImgBB error"}
-                    return file_url
+                    return [file_url]
             logger.info(f'Polling retry: {counter}')
             counter += 1
             await asyncio.sleep(3)
 
 
-async def generate_image(prompt: str, photos: list[str] = None) -> str | dict:
+async def generate_image_by_veo(prompt: str, photos: list[str] = None) -> list[str] | dict:
     url = "http://95.164.55.41:8765/v1/gemini/generate-image-async"
     data = aiohttp.FormData()
     data.add_field('prompt', prompt)
@@ -206,7 +290,7 @@ async def generate_image(prompt: str, photos: list[str] = None) -> str | dict:
     headers = {'Authorization': f'Bearer {config.veo.api_key}'}
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url, data=data, headers=headers) as response:
+        async with session.post(url, data=data, headers=headers, ssl=False) as response:
             if response.status not in [200, 201]:
                 print(response.status)
                 return {'error': f"Request status code {response.status}"}
@@ -216,6 +300,6 @@ async def generate_image(prompt: str, photos: list[str] = None) -> str | dict:
                 return {'error': data['message']}
             req_id = data['request_id']
             logger.info('Success request_id save')
-    return await _polling_image_generate(req_id)
+    return await _polling_veo_generate(req_id)
 
 #"""

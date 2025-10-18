@@ -10,7 +10,7 @@ from aiogram_dialog.widgets.input import ManagedTextInput, MessageInput
 
 from services.subgram.api import get_user_tasks, check_user_tasks, check_user_task
 from utils.images_funcs import image_to_url, save_bot_files
-from utils.ai_funcs import get_prompt_answer, generate_image, generate_on_api, solve_task
+from utils.ai_funcs import get_prompt_answer, generate_division, generate_on_api, solve_task
 from utils.wrapper_funcs import generate_wrapper
 from keyboards.keyboard import dialog_keyboard
 from database.action_data_class import DataInteraction
@@ -281,10 +281,10 @@ async def get_image_text(msg: Message, widget: ManagedTextInput, dialog_manager:
         return
     session: DataInteraction = dialog_manager.middleware_data.get('session')
     result = await generate_wrapper(
-        generate_image,
+        generate_division,
         msg.bot,
         msg.from_user.id,
-        text
+        text, msg.bot
     )
     if isinstance(result, dict):
         await msg.answer(f'🚨Во время генерации произошла ошибка:\n<code>{result.get("error")}</code>')
@@ -329,19 +329,16 @@ async def get_image_prompt(msg: Message, widget: MessageInput, dialog_manager: D
     album: list[Message] = dialog_manager.middleware_data.get('album')
     if len(album) > 1:
         text = album[0].caption
-        images = await save_bot_files(album, msg.bot)
+        images = album
     else:
         text = msg.caption
-        images = await save_bot_files([msg], msg.bot)
+        images = [msg]
     result = await generate_wrapper(
-        generate_image,
+        generate_division,
         msg.bot,
         msg.from_user.id,
-        text, images
+        text, msg.bot, images
     )
-    for image in images:
-        if os.path.exists(image):
-            os.remove(image)
     if isinstance(result, dict):
         await msg.answer(f'🚨Во время генерации произошла ошибка:\n<code>{result.get("error")}</code>')
         dialog_manager.dialog_data.clear()

@@ -9,7 +9,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from keyboards.keyboard import dialog_keyboard
 from utils.wrapper_funcs import generate_wrapper
-from utils.ai_funcs import get_text_answer, get_assistant_and_thread, generate_image
+from utils.ai_funcs import get_text_answer, get_assistant_and_thread
 from utils.images_funcs import save_bot_files
 from database.action_data_class import DataInteraction
 from states.state_groups import startSG, DialogSG
