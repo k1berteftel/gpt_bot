@@ -416,7 +416,7 @@ async def get_video_prompt_getter(event_from_user: User, dialog_manager: DialogM
     params = dialog_manager.dialog_data.get('params')
     if not params and model in duration_prices.keys():
         params = {
-            'duration': duration_prices.get(model).keys()[0],
+            'duration': list(duration_prices.get(model).keys())[0],
             'aspect_ratio': '16:9'
         }
         dialog_manager.dialog_data['params'] = params
