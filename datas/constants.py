@@ -10,7 +10,8 @@ prices = {
         'seedance': {
             'lite': 61,
             'pro': 81
-        }
+        },
+        'sora': 81
     },
     'task': 11
 }
@@ -28,12 +29,18 @@ duration_prices = {
     'kling': {
         5: 121,
         10: 242,
+    },
+    'sora': {
+        4: 81,
+        8: 91,
+        12: 101
     }
 }
 
 model_ratios = {
     'seedance': ["16:9", "9:16"],
-    'kling': ["16:9", "9:16"]
+    'kling': ["16:9", "9:16"],
+    'sora': ["16:9", "9:16"]
 }
 
 
@@ -88,7 +95,15 @@ model_examples = {
                 'media': 'media/video_gen/seedance_video.mp4',
                 'media_type': 'video',
                 'url': 'https://t.me/pakrnet'
-            }
+            },
+            'sora': {
+                'text': '<b>Промпт:</b>\n<blockquote expandable>Make a Boxer dog training in a gym against a '
+                        'punching bag, the camera switches every 3 seconds, and you can hear the dog’s voice '
+                        'motivating itself. He only has one glove on each hand.</blockquote>',
+                'media_type': 'video',
+                'media': 'media/video_gen/sora_ex.mp4',
+                'url': 'https://t.me/sora_video_1'
+            },
         }
     }
 }

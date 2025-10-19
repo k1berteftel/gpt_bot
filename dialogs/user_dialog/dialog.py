@@ -85,6 +85,7 @@ user_dialog = Dialog(
         Column(
             Button(Const('Kling v2.1'), id='kling_video_choose', on_click=getters.video_choose),
             Button(Const('Seedance 1'), id='seedance_video_choose', on_click=getters.video_choose),
+            Button(Const('Sora 2'), id='sora_video_choose', on_click=getters.video_choose),
         ),
         SwitchTo(Const('⬅️Назад'), id='back', state=startSG.start),
         state=startSG.video_menu
