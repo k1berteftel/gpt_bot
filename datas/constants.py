@@ -96,15 +96,15 @@ model_examples = {
                 'media_type': 'video',
                 'url': 'https://t.me/pakrnet'
             },
-            'sora': {
-                'text': '<b>Промпт:</b>\n<blockquote expandable>Make a Boxer dog training in a gym against a '
-                        'punching bag, the camera switches every 3 seconds, and you can hear the dog’s voice '
-                        'motivating itself. He only has one glove on each hand.</blockquote>',
-                'media_type': 'video',
-                'media': 'media/video_gen/sora_ex.mp4',
-                'url': 'https://t.me/sora_video_1'
-            },
-        }
+        },
+        'sora': {
+            'text': '<b>Промпт:</b>\n<blockquote expandable>Make a Boxer dog training in a gym against a '
+                    'punching bag, the camera switches every 3 seconds, and you can hear the dog’s voice '
+                    'motivating itself. He only has one glove on each hand.</blockquote>',
+            'media_type': 'video',
+            'media': 'media/video_gen/sora_ex.mp4',
+            'url': 'https://t.me/sora_video_1'
+        },
     }
 }
 
