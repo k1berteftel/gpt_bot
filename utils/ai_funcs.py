@@ -151,8 +151,12 @@ async def generate_division(prompt: str, bot: Bot, photos: list[Message] | None 
     #if counter % 2 == 0:
     if photos:
         images = await download_and_upload_images(bot, photos)
-    result = await generate_image_by_unifically(prompt, images)
-    if isinstance(result, dict):
+    try:
+        result = await generate_image_by_unifically(prompt, images)
+    except Exception as err:
+        logging.error(f'unifically generate error: {err}')
+        result = None
+    if isinstance(result, dict) or result is None:
         if photos:
             images = await save_bot_files(photos, bot)
         result = await generate_image_by_veo(prompt, images)
@@ -240,7 +244,7 @@ async def _polling_veo_generate(req_id: str) -> list[str] | dict:
                 status = data.get('status')
                 if status and status == 'failed':
                     return {'error': data['error']}
-                if not status and data['success']:
+                if status == 'completed':
                     image_data = data['images'][0]
                     try:
                         file_path = await save_image(image_data)
@@ -298,7 +302,7 @@ async def generate_image_by_veo(prompt: str, photos: list[str] = None) -> list[s
                 return {'error': f"Request status code {response.status}"}
             data = await response.json()
             logger.info('Success input data load')
-            if data['status'] != 'queued':
+            if data['status'] not in ['queued', 'processing']:
                 return {'error': data['message']}
             req_id = data['request_id']
             logger.info('Success request_id save')
