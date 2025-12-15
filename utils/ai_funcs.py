@@ -90,7 +90,8 @@ async def get_text_answer(prompt: str, assistant_id: str, thread_id: str, images
     """
         Обработка ИИшкой сообщения юзера, возвращает ответ ИИ
     """
-    images = [{'type': 'image_url', "image_url": {"url": photo}} for photo in images]
+    if images:
+        images = [{'type': 'image_url', "image_url": {"url": photo}} for photo in images]
     content = []
     if prompt:
         content.append({"type": "text", "text": prompt})
@@ -212,6 +213,7 @@ async def generate_image_by_unifically(prompt: str, photos: list[str]) -> list[s
     async with aiohttp.ClientSession() as client:
         async with client.post(url, headers=headers, json=data, ssl=False) as response:
             print(response.status)
+            #print(await response.text())
             if response.status not in [200, 201]:
                 data = await response.json()
                 return {'error': data['data']['error']['message']}
