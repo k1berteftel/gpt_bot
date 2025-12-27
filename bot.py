@@ -54,8 +54,6 @@ async def main():
     await configurate_tables(session)
 
     db = DataInteraction(session)
-    for channel in await db.get_op():
-        await db.del_op_channel(channel.chat_id)
 
     scheduler: AsyncIOScheduler = AsyncIOScheduler()
     scheduler.start()
