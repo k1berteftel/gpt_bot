@@ -109,7 +109,6 @@ admin_dialog = Dialog(
         SwitchTo(Const('🔙 Назад'), id='back_deeplinks_menu', state=adminSG.deeplink_menu),
         state=adminSG.get_deeplink_name
     ),
-
     Window(
         Format('{text}'),
         Column(
