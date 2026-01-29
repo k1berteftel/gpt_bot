@@ -125,7 +125,6 @@ class DataInteraction():
             result = await session.scalar(select(OpTable).where(OpTable.chat_id == chat_id))
         return result
 
-
     async def get_rates(self):
         async with self._sessions() as session:
             result = await session.scalars(select(RatesTable))
