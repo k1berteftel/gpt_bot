@@ -130,5 +130,6 @@ async def send_sponsor_static(msg: Message, session: DataInteraction):
         link_users = round(link_users / 1.15)
         text += f'{counter}. {link.name} - {link_users}\n'
         users += link_users
+        counter += 1
     text += f'\n<b>Всего: </b> {users}'
     await msg.answer(text)
