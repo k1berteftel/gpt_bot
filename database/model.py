@@ -43,6 +43,8 @@ class DeeplinksTable(Base):
     week: Mapped[int] = mapped_column(Integer, default=0)
     create: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=False), default=func.now())
 
+    creator: Mapped[int] = mapped_column(BigInteger, default=None, server_default=None, nullable=True)
+
 
 class RatesTable(Base):
     __tablename__ = 'rates'
@@ -59,6 +61,14 @@ class AdminsTable(Base):
 
     user_id: Mapped[int] = mapped_column(BigInteger)
     name: Mapped[str] = mapped_column(VARCHAR)
+
+
+class SponsorsTable(Base):
+    __tablename__ = 'sponsors'
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+
+    user_id: Mapped[int] = mapped_column(BigInteger)
 
 
 class OneTimeLinksIdsTable(Base):

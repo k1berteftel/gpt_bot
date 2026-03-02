@@ -20,6 +20,7 @@ from database.model import Base
 from config_data.config import load_config, Config
 from handlers.user_handlers import user_router
 from handlers.payment_handlers import payment_router
+from handlers.admin_handlers import admin_router
 from dialogs import get_dialogs
 from middlewares import TransferObjectsMiddleware, RemindMiddleware, OpMiddleware, AlbumMiddleware
 
@@ -67,7 +68,7 @@ async def main():
     dp = Dispatcher()  # storage=storage)
 
     # подключаем роутеры
-    dp.include_routers(user_router, payment_router, *get_dialogs())
+    dp.include_routers(user_router, admin_router, payment_router, *get_dialogs())
 
     setup_dialogs(dp)
     # подключаем middleware

@@ -3,7 +3,8 @@ import datetime
 from sqlalchemy import select, insert, update, column, text, delete
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from database.model import (UsersTable, DeeplinksTable, OneTimeLinksIdsTable, AdminsTable, RatesTable, OpTable, StaticTable)
+from database.model import (UsersTable, DeeplinksTable, OneTimeLinksIdsTable, AdminsTable, RatesTable,
+                            OpTable, StaticTable, SponsorsTable)
 
 
 async def configurate_tables(sessions: async_sessionmaker):
@@ -61,11 +62,12 @@ class DataInteraction():
             ))
             await session.commit()
 
-    async def add_deeplink(self, link: str, name: str):
+    async def add_deeplink(self, link: str, name: str, creator: int | None = None):
         async with self._sessions() as session:
             await session.execute(insert(DeeplinksTable).values(
                 link=link,
-                name=name
+                name=name,
+                creator=creator
             ))
             await session.commit()
 
@@ -99,6 +101,18 @@ class DataInteraction():
                 balance=UsersTable.balance + 10
             ))
             await session.commit()
+
+    async def add_sponsor(self, user_id: int):
+        async with self._sessions() as session:
+            await session.execute(insert(SponsorsTable).values(
+                user_id=user_id
+            ))
+            await session.commit()
+
+    async def get_sponsors(self):
+        async with self._sessions() as session:
+            result = await session.scalars(select(SponsorsTable))
+        return result.fetchall()
 
     async def get_users(self):
         async with self._sessions() as session:
@@ -153,6 +167,11 @@ class DataInteraction():
     async def get_deeplink(self, id: int):
         async with self._sessions() as session:
             result = await session.scalar(select(DeeplinksTable).where(DeeplinksTable.id == id))
+        return result
+
+    async def get_deeplink_by_name(self, link: str):
+        async with self._sessions() as session:
+            result = await session.scalar(select(DeeplinksTable).where(DeeplinksTable.link == link))
         return result
 
     async def get_statistics(self):
