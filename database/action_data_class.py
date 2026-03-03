@@ -214,6 +214,13 @@ class DataInteraction():
             ))
             await session.commit()
 
+    async def set_user_op(self, user_id: int):
+        async with self._sessions() as session:
+            await session.execute(update(UsersTable).where(UsersTable.user_id == user_id).values(
+                op=True
+            ))
+            await session.commit()
+
     async def update_op_entry(self, op_id: int):
         async with self._sessions() as session:
             await session.execute(update(OpTable).where(OpTable.id == op_id).values(

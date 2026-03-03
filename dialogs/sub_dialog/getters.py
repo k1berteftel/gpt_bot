@@ -53,6 +53,9 @@ async def check_sub(clb: CallbackQuery, widget: Button, dialog_manager: DialogMa
             )
         except Exception:
             ...
+    user = await session.get_user(clb.from_user.id)
+    if not user.op:
+        await session.set_user_op(clb.from_user.id)
     await dialog_manager.done()
     await clb.message.delete()
     await dialog_manager.start(startSG.start, mode=StartMode.RESET_STACK)

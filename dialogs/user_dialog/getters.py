@@ -33,6 +33,9 @@ async def start_getter(event_from_user: User, dialog_manager: DialogManager, **k
     free = True
     if not user.last_generate or user.last_generate < datetime.datetime.now() - datetime.timedelta(days=1):
         free = True
+    sponsor = False
+    if event_from_user.id in [user.user_id for user in await session.get_sponsors()]:
+        sponsor = True
     bonus_text = "\n🎁<b>Бонус</b>: Каждый день тебе доступна <b>1 бесплатная генерация с текстом!</b>" if free else ""
     text = (f'<b>Добро пожаловать в Ultra GPT 👋🏻 </b>\n\n'
             f'<b>💬 Умный диалог</b> — Задавай вопросы, ищи идеи или просто общайся с продвинутым ИИ.\n'
@@ -42,6 +45,7 @@ async def start_getter(event_from_user: User, dialog_manager: DialogManager, **k
             f' {bonus_text}')
     media = MediaAttachment(type=ContentType.PHOTO, path='media/menu.jpg')
     return {
+        'sponsors': sponsor,
         'media': media,
         'text': text,
         'admin': admin

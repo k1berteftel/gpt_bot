@@ -75,3 +75,9 @@ class adminSG(StatesGroup):
 
     get_user_data = State()
     get_currency_amount = State()
+
+
+class SponsorsSG(StatesGroup):
+    start = State()
+    link_menu = State()
+    get_link_name = State()

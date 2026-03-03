@@ -18,15 +18,20 @@ class UsersTable(Base):
     name: Mapped[str] = mapped_column(VARCHAR)
     user_id: Mapped[int] = mapped_column(BigInteger, unique=True)
     balance: Mapped[int] = mapped_column(Integer, default=20)
+
     referral: Mapped[int] = mapped_column(BigInteger, default=None, nullable=True)
-    join: Mapped[str] = mapped_column(VARCHAR, default=None, nullable=True)
     refs: Mapped[int] = mapped_column(Integer, default=0)
+    join: Mapped[str] = mapped_column(VARCHAR, default=None, nullable=True)
+
     gens: Mapped[int] = mapped_column(Integer, default=0)
     earn: Mapped[int] = mapped_column(Integer, default=0)
+
     active: Mapped[int] = mapped_column(Integer, default=1)
     activity: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=False), default=func.now())
     entry: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=False), default=func.now())
+
     last_generate: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=False), default=None, nullable=True)
+    op: Mapped[bool] = mapped_column(Boolean, default=False, server_default=None, nullable=True)
 
 
 class DeeplinksTable(Base):

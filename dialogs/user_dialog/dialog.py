@@ -7,7 +7,7 @@ from aiogram_dialog.widgets.media import DynamicMedia
 
 from dialogs.user_dialog import getters
 
-from states.state_groups import startSG, adminSG, PaymentSG
+from states.state_groups import startSG, adminSG, PaymentSG, SponsorsSG
 
 user_dialog = Dialog(
     Window(
@@ -23,7 +23,8 @@ user_dialog = Dialog(
             SwitchTo(Const('👤Профиль'), id='profile_switcher', state=startSG.profile),
             #SwitchTo(Const('🎁Задания'), id='tasks_menu_swithcer', state=startSG.tasks_menu),
             Start(Const('💰Пополнить баланс'), id='payment_menu', state=PaymentSG.choose_rate),
-            Start(Const('Админ панель'), id='admin', state=adminSG.start, when='admin')
+            Start(Const('Админ панель'), id='admin', state=adminSG.start, when='admin'),
+            Start(Const('Партнерские ссылки'), id='sponsors', state=SponsorsSG.start, when='sponsors'),
         ),
         getter=getters.start_getter,
         state=startSG.start
