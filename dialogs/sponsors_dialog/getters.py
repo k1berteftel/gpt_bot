@@ -53,7 +53,7 @@ async def deeplinks_pager(clb: CallbackQuery, widget: Button, dialog_manager: Di
 
 async def get_link_name(msg: Message, widget: ManagedTextInput, dialog_manager: DialogManager, text: str):
     session: DataInteraction = dialog_manager.middleware_data.get('session')
-    await session.add_deeplink(text, text)
+    await session.add_deeplink(text, text, msg.from_user.id)
     links = [deeplink for deeplink in await session.get_deeplinks() if deeplink.creator and deeplink.creator == msg.from_user.id]
     buttons = [(f'{link.name} ({link.entry})', link.id) for link in links]
     buttons = [buttons[i:i + 10] for i in range(0, len(buttons), 10)]
