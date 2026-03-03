@@ -70,12 +70,13 @@ async def main():
     # подключаем роутеры
     dp.include_routers(user_router, admin_router, payment_router, *get_dialogs())
 
-    setup_dialogs(dp)
     # подключаем middleware
     dp.message.middleware(AlbumMiddleware())
     dp.update.middleware(TransferObjectsMiddleware())
     dp.callback_query.middleware(OpMiddleware())
     dp.update.middleware(RemindMiddleware())
+
+    setup_dialogs(dp)
 
     # запуск
     await bot.delete_webhook(drop_pending_updates=True)

@@ -235,6 +235,9 @@ async def generate_image_by_unifically(prompt: str, photos: list[str]) -> list[s
     return await _polling_unifically_generate(task_id)
 
 
+print(asyncio.run(generate_image_by_unifically('Сделай фото красивой мультяшного русского борща', [])))
+
+
 async def _polling_veo_generate(req_id: str) -> list[str] | dict:
     url = f'http://95.164.55.41:8765/v1/gemini/image-status/{req_id}'
     headers = {'Authorization': f'Bearer {config.veo.api_key}'}
