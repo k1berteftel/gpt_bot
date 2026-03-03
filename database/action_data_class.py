@@ -169,9 +169,9 @@ class DataInteraction():
             result = await session.scalar(select(DeeplinksTable).where(DeeplinksTable.id == id))
         return result
 
-    async def get_deeplink_by_name(self, link: str):
+    async def get_deeplink_by_name(self, name: str):
         async with self._sessions() as session:
-            result = await session.scalar(select(DeeplinksTable).where(DeeplinksTable.link == link))
+            result = await session.scalar(select(DeeplinksTable).where(DeeplinksTable.name == name))
         return result
 
     async def get_statistics(self):

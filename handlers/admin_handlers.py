@@ -66,11 +66,11 @@ async def show_ref_static(msg: Message, session: DataInteraction):
             return
     else:
         divider = False
-    arg = msg.text.split(' ')[1]
+    arg = msg.text.split(' ', maxsplit=1)[1]
     deeplink = await session.get_deeplink_by_name(arg)
     if not deeplink:
         await msg.answer('Такой рекламной ссылки не найдено')
-    if not divider and deeplink.creator != msg.from_user.id:
+    if divider and deeplink.creator != msg.from_user.id:
         await msg.answer('Такой рекламной ссылки не найдено')
     users = [user for user in await session.get_users() if user.join and user.join == deeplink.link]
     users_len = 0
@@ -85,10 +85,10 @@ async def show_ref_static(msg: Message, session: DataInteraction):
         users_len += 1
 
     if divider:
-        users = round(users_len / 1.15)
-        refs = round(refs / 1.15)
-        op = round(op / 1.15)
-        gens = round(deeplink.gens / 1.15)
+        users = int(round(users_len / 1.15)) if users else 0
+        refs = int(round(refs / 1.15)) if refs else 0
+        op = int(round(op / 1.15)) if op else 0
+        gens = int(round(deeplink.gens / 1.15)) if deeplink.gens else 0
     else:
         users = users_len
         gens = deeplink.gens
@@ -127,7 +127,7 @@ async def send_sponsor_static(msg: Message, session: DataInteraction):
             if not (user.activity - user.entry >= timedelta(minutes=1)):
                 continue
             link_users += 1
-        link_users = round(link_users / 1.15)
+        link_users = int(round(link_users / 1.15)) if link_users else 0
         text += f'{counter}. {link.name} - {link_users}\n'
         users += link_users
         counter += 1
