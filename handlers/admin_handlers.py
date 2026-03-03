@@ -76,6 +76,7 @@ async def show_ref_static(msg: Message, session: DataInteraction):
     users_len = 0
     refs = 0
     op = 0
+    gens = 0
     for user in users:
         if not (user.activity - user.entry >= timedelta(minutes=1)):
             continue
@@ -83,15 +84,15 @@ async def show_ref_static(msg: Message, session: DataInteraction):
         if user.op:
             op += 1
         users_len += 1
+        gens += user.gens
 
     if divider:
         users = int(round(users_len / 1.15)) if users else 0
         refs = int(round(refs / 1.15)) if refs else 0
         op = int(round(op / 1.15)) if op else 0
-        gens = int(round(deeplink.gens / 1.15)) if deeplink.gens else 0
+        gens = int(round(gens / 1.15)) if gens else 0
     else:
         users = users_len
-        gens = deeplink.gens
 
     text = (f'<b>({deeplink.name}) 🗓 Создано: {datetime.today().strftime("%d-%m-%Y")}</b>\n\n'
             f'Общее:\nВсего: {users}\n - Прошло ОП: {round(op/users*100, 1) if op else 0}%'
