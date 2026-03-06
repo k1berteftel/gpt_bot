@@ -35,6 +35,11 @@ class Unifically:
 
 
 @dataclass
+class APIMart:
+    api_key: str
+
+
+@dataclass
 class VeoApi:
     api_key: str
 
@@ -81,6 +86,7 @@ class Config:
     yookassa: Yookassa
     crypto_bot: CryptoBot
     subgram: Subgram
+    apimart: APIMart
 
 
 def load_config(path: str | None = None) -> Config:
@@ -126,5 +132,8 @@ def load_config(path: str | None = None) -> Config:
         ),
         subgram=Subgram(
             api_key=env('subgram_api_key')
+        ),
+        apimart=APIMart(
+            api_key=env('apimart_api_key')
         )
     )
