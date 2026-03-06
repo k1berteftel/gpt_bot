@@ -156,7 +156,7 @@ async def generate_division(prompt: str, bot: Bot, photos: list[Message] | None 
     return result
 
 
-async def _polling_unifically_generate(task_id: str) -> list[str] | dict:
+async def _polling_unifically_generate(task_id: str) -> str | dict:
     url = f'https://api.unifically.com/v1/tasks/{task_id}'
     headers = {
         'Content-Type': 'application/json',
