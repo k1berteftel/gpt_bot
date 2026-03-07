@@ -39,7 +39,7 @@ async def process_generate(msg: Message):
     for p in [5, 20, 30, 40, 55, 70, 75]:
         text = _progress_text(p)
         await msg.edit_text(text)
-        await asyncio.sleep(1.2)
+        await asyncio.sleep(2.3)
 
 
 async def generate_wrapper(func, bot: Bot, user_id: int, *args) -> any:
@@ -53,7 +53,7 @@ async def generate_wrapper(func, bot: Bot, user_id: int, *args) -> any:
         result = await func(*args)
     except Exception as err:
         logger.error(f'Ошибка во время генерации: {err}')
-        result = None
+        result = {'error': str(err)}
     finally:
         task.cancel()
         await quick_generation(msg)

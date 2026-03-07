@@ -11,7 +11,7 @@ prices = {
             'lite': 61,
             'pro': 81
         },
-        'sora': 61
+        'sora': 71
     },
     'task': 11
 }
@@ -31,7 +31,6 @@ duration_prices = {
         10: 242,
     },
     'sora': {
-        5: 61,
         10: 71,
         15: 81
     }

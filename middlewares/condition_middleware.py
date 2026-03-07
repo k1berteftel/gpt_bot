@@ -41,19 +41,11 @@ class RemindMiddleware(BaseMiddleware):
         await session.set_activity(user_id=event_from_user.id)
 
         bot: Bot = data.get('bot')
-        task_name_1 = f'{event_from_user.id}_2_remind'
         task_name_2 = f'{event_from_user.id}_7_remind'
 
         for task in asyncio.all_tasks():
-            if task.get_name() in [task_name_1, task_name_2]:
+            if task.get_name() in [task_name_2]:
                 task.cancel()
-        keyboard_1 = InlineKeyboardMarkup(
-            inline_keyboard=[[InlineKeyboardButton(text='⬅️В главное меню', callback_data='back_main')]]
-        )
-        text_1 = ('👋🏻 Привет! Давно не общались, а ведь я могу снова помочь тебе:\n\n• Сделать генерацию из трендов '
-                  '\n• Ответить на любой вопрос \n• Решить задачу')
-        task_1 = asyncio.create_task(_remind_func(event_from_user.id, text_1, keyboard_1, 2, bot))
-        task_1.set_name(task_name_1)
 
         text_2 = ('Ты забыл обо мне? 😢\n\nА я тут готов помочь хоть сейчас — сделать генерацию из тренда или '
                   'решить любую задачу \n\nДавай попробуем еще раз🙌🏻')

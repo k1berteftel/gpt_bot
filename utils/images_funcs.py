@@ -29,7 +29,7 @@ async def _upload_image_to_imgbb(image_path: str) -> str | None:
         'Authorization': f'Bearer {config.unifically.api_token}'
     }
 
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout()) as session:
         async with session.put(url, data=data, headers=headers, ssl=False) as response:
             if response.status not in [200, 201]:
                 print(await response.text())
@@ -39,6 +39,9 @@ async def _upload_image_to_imgbb(image_path: str) -> str | None:
                 print(data['message'])
                 return None
     return data['file_url']
+
+
+#print(asyncio.run(_upload_image_to_imgbb("Mail_logo.png")))
 
 
 async def image_to_url(photo: PhotoSize, bot: Bot) -> str:

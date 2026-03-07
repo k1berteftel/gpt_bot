@@ -14,4 +14,5 @@ SQLAlchemy
 pytz
 openai
 yookassa-async
+pillow
 
