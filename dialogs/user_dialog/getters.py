@@ -87,12 +87,12 @@ async def get_task_prompt(msg: Message, widget: MessageInput, dialog_manager: Di
         await dialog_manager.switch_to(startSG.enough_balance)
         return
     prompt = msg.caption
-    image = await image_to_url(msg.photo[-1], msg.bot)
+    image = msg.photo[-1]
     result = await generate_wrapper(
         solve_task,
         msg.bot,
         msg.from_user.id,
-        image, prompt
+        image, msg.bot, prompt
     )
     if not result:
         await msg.answer('🚨Во время генерации произошла какая-то ошибка')
@@ -155,7 +155,7 @@ async def get_gen_prompt_text(msg: Message, widget: ManagedTextInput, dialog_man
         get_prompt_answer,
         msg.bot,
         msg.from_user.id,
-        prompt, text
+        prompt, text, msg.bot
     )
     if not answer:
         await msg.answer('🚨Во время генерации произошла какая-то ошибка')
@@ -189,13 +189,13 @@ async def get_gen_prompt_message(msg: Message, widget: MessageInput, dialog_mana
     else:
         prompt = ('Твоя задача помочь пользователю создать компактный и подробный промпт для генерации видео под его запрос\n'
                   '!!В ответ отправляй только сгенерированный тобою промпт')
-    image = await image_to_url(msg.photo[-1], msg.bot)
+    image = msg.photo[-1]
     text = msg.caption
     answer = await generate_wrapper(
         get_prompt_answer,
         msg.bot,
         msg.from_user.id,
-        prompt, text, image
+        prompt, text, msg.bot, image
     )
     if not answer:
         await msg.answer('🚨Во время генерации произошла какая-то ошибка')

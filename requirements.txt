@@ -5,6 +5,7 @@ aiocryptopay
 aiogram_dialog
 APScheduler
 asyncpg
+anthropic
 environs
 nats-py
 ormsgpack

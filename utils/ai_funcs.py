@@ -11,24 +11,27 @@ from pathlib import Path
 from typing import Literal, List, Tuple, Optional
 
 from PIL import Image
+from anthropic import AsyncAnthropic
 from aiogram import Bot
-from aiogram.types import Message
-from openai import AsyncOpenAI
+from aiogram.types import Message, PhotoSize
 from openai.types.beta.threads.message_content_part_param import MessageContentPartParam
 
-from utils.images_funcs import save_image, file_to_url, save_bot_files, download_and_upload_images
+from utils.images_funcs import save_image, file_to_url, save_bot_files, download_and_upload_images, photo_to_base64
 from config_data.config import Config, load_config
 
 config: Config = load_config()
 
 proxy = config.proxy
 
+client = AsyncAnthropic(
+    api_key=config.apimart.api_key,
+    base_url="https://api.apimart.ai",
+    #http_client=httpx.AsyncClient(proxy=f'http://{proxy.login}:{proxy.password}@{proxy.ip}:{proxy.port}')
+)
+
 logger = logging.getLogger(__name__)
 
-client = AsyncOpenAI(
-    api_key=config.openai.token,
-    http_client=httpx.AsyncClient(proxies=f'http://{proxy.login}:{proxy.password}@{proxy.ip}:{proxy.port}')
-)
+
 
 
 FORMATS_API = [
@@ -232,8 +235,7 @@ async def determine_best_format(
     return default_format
 
 
-async def solve_task(image: str, prompt: str | None = None):
-    images = [{'type': 'image_url', "image_url": {"url": image}}]
+async def solve_task(image: PhotoSize, bot: Bot, prompt: str | None = None):
     system_prompt = ("Реши задачу и представь решение в понятном, читаемом формате без "
                      "использования LaTeX и боксов. Используй обычные математические "
                      "символы и простым языком, пошагово объясняй каждое свое "
@@ -241,89 +243,101 @@ async def solve_task(image: str, prompt: str | None = None):
                      "возвращай строго в формате <code>действие</code>")
     prompt = system_prompt if not prompt else system_prompt + (f'\nВот пользовательский промпт к '
                                                                f'решению задачи: "{prompt}"')
-    response = await client.chat.completions.create(
-        model="gpt-5",
-        messages=[
+    messages = []
+    if image:
+        data, media_type = await photo_to_base64(image, bot)
+        messages.append(
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": prompt},
-                    *images
-                ]
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": media_type,
+                            "data": data,
+                        },
+                    },
+                    {"type": "text", "text": prompt} if prompt else ...
+                ],
             }
-        ],
-    )
-    print(response.usage.total_tokens, response.usage.prompt_tokens, response.usage.completion_tokens)
-    print(response.choices[0].message.content)
-    return response.choices[0].message.content
-
-
-async def get_prompt_answer(prompt: str, text: str, image: str | None = None) -> str:
-    messages = []
-    messages.append({'role': 'system', 'content': prompt})
-    if image:
-        messages.append({'type': 'image_url', "image_url": {"url": image}})
-    messages.append({"role": "user", "content": text})
-    response = await client.chat.completions.create(
-        model='gpt-4.1-mini',
+        )
+    else:
+        messages.append({"role": "user", "content": prompt})
+    message = await client.messages.create(
+        model="claude-sonnet-4-5-20250929",
+        max_tokens=1024,
+        system=prompt,
         messages=messages
     )
-    return response.choices[0].message.content.strip()
+    answer = message.content[0].text
+    return answer
 
 
-async def get_assistant_and_thread(model: str = 'gpt-4.1-mini', role: str | None = None):
-    """
-    :param model: модель чата гпт
-    :return: Две str переменной по факту являющиеся уникальными для каждого юзера, чтобы обрабатывать их
-        диалог отдельно от других юзеров
-    """
-    assistant = await client.beta.assistants.create(
-        model=model,
-        instructions=role,
-        temperature=1.0,
-        name="Яна"
+async def get_prompt_answer(prompt: str, text: str, bot: Bot, image: PhotoSize | None = None) -> str:
+    messages = []
+    if image:
+        data, media_type = await photo_to_base64(image, bot)
+        messages.append(
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": media_type,
+                            "data": data,
+                        },
+                    },
+                    {"type": "text", "text": text} if text else ...
+                ],
+            }
+        )
+    else:
+        messages.append({"role": "user", "content": text})
+    message = await client.messages.create(
+        model="claude-sonnet-4-5-20250929",
+        max_tokens=1024,
+        system=prompt,
+        messages=messages
     )
-
-    thread = await client.beta.threads.create()
-    return assistant.id, thread.id
-
-
-#print(asyncio.run(get_assistant_and_thread()))
+    answer = message.content[0].text
+    return answer
 
 
-async def get_text_answer(prompt: str, assistant_id: str, thread_id: str, images: list[str] = None) -> str | dict | None:
-    """
-        Обработка ИИшкой сообщения юзера, возвращает ответ ИИ
-    """
-    if images:
-        images = [{'type': 'image_url', "image_url": {"url": photo}} for photo in images]
-    content = []
-    if prompt:
-        content.append({"type": "text", "text": prompt})
-    if images:
-        content.extend(images)
-    message = await client.beta.threads.messages.create(
-        thread_id=thread_id,
-        role="user",
-        content=content
+async def get_ai_answer(prompt: str | None, bot: Bot, image: PhotoSize | None = None, messages: list[dict] = None) -> tuple[str, list]:
+    if not messages:
+        messages = []
+
+    if image:
+        data, media_type = await photo_to_base64(image, bot)
+        messages.append(
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": media_type,
+                            "data": data,
+                        },
+                    },
+                    {"type": "text", "text": prompt} if prompt else ...
+                ],
+            }
+        )
+    else:
+        messages.append({"role": "user", "content": prompt})
+    message = await client.messages.create(
+        model="claude-sonnet-4-5-20250929",
+        max_tokens=1024,
+        messages=messages
     )
-    print(message.__dict__)
-    run = await client.beta.threads.runs.create_and_poll(
-        thread_id=thread_id,
-        assistant_id=assistant_id
-    )
-    logger.info(run.status)
-    logger.info(run.last_error)
-    info = (f'Стоимость запроса: {run.usage.completion_tokens}\nСтоимость промпта: {run.usage.prompt_tokens}'
-            f'\nОбщая стоимость: {run.usage.total_tokens}')
-    logger.info(info)
-    if run.status == "completed":
-        messages = await client.beta.threads.messages.list(thread_id=thread_id)
-        logger.info(messages)
-
-        async for message in messages:
-            logger.info(message.content[0].text.value)
-            return message.content[0].text.value
+    answer = message.content[0].text
+    messages.append({"role": "assistant", "content": answer})
+    return answer, messages
 
 
 async def generate_on_api(params: dict) -> str:

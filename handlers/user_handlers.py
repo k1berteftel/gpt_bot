@@ -1,7 +1,7 @@
 import os
 
 from aiogram import Router, F, Bot
-from aiogram.filters import CommandStart, CommandObject
+from aiogram.filters import CommandStart, CommandObject, or_f
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram_dialog import DialogManager, StartMode
@@ -9,7 +9,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from keyboards.keyboard import dialog_keyboard
 from utils.wrapper_funcs import generate_wrapper
-from utils.ai_funcs import get_text_answer, get_assistant_and_thread
+from utils.ai_funcs import get_ai_answer
 from utils.images_funcs import save_bot_files
 from database.action_data_class import DataInteraction
 from states.state_groups import startSG, DialogSG
@@ -76,7 +76,7 @@ async def start_dialog(msg: Message, dialog_manager: DialogManager, session: Dat
     await dialog_manager.start(state=startSG.start, data=data, mode=StartMode.RESET_STACK)
 
 
-@user_router.message(DialogSG.waiting_for_message, F.text)
+@user_router.message(DialogSG.waiting_for_message, or_f(F.text, F.photo))
 async def process_dialog(msg: Message, session: DataInteraction, dialog_manager: DialogManager,
                          scheduler: AsyncIOScheduler, state: FSMContext):
     try:
@@ -87,19 +87,22 @@ async def process_dialog(msg: Message, session: DataInteraction, dialog_manager:
     except Exception:
         ...
     state_data = await state.get_data()
-    assistant_id, thread_id = state_data.get('assistant_id'), state_data.get('thread_id')
-    if not assistant_id or not thread_id:
-        assistant_id, thread_id = await get_assistant_and_thread()
-        await state.update_data(assistant_id=assistant_id, thread_id=thread_id)
-    prompt = msg.text
+    messages = state_data.get('messages')
+    image = msg.photo[-1] if msg.photo else None
+    prompt = msg.text if not msg.photo else msg.caption
     answer = await generate_wrapper(
-        get_text_answer,
+        get_ai_answer,
         msg.bot,
         msg.from_user.id,
-        prompt, assistant_id, thread_id
+        prompt, msg.bot, image, messages
     )
     if not answer:
         answer = '❗️Во время операции произошла какая-то ошибка, пожалуйста попробуйте снова'
+    elif isinstance(answer, dict):
+        answer = f'❗️Во время операции произошла какая-то ошибка, пожалуйста попробуйте снова\n<code>{answer.get("error")}</code>'
+    else:
+        answer, messages = answer[0], answer[1]
+        await state.update_data(messages=messages)
     await msg.answer(answer, reply_markup=dialog_keyboard)
     """
     task_name = f'{msg.from_user.id}_context'

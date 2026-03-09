@@ -2,6 +2,7 @@ import asyncio
 import os
 import base64
 import logging
+import tempfile
 from pathlib import Path
 
 import aiohttp
@@ -154,3 +155,45 @@ async def save_image(data: dict) -> str:
     except Exception as e:
         print(f"❌ Ошибка при сохранении изображения: {e}")
         raise e
+
+
+async def photo_to_base64(photo: PhotoSize, bot: Bot) -> tuple[str, str] | None:
+    """
+    Конвертирует PhotoSize из Telegram в base64 и автоматически удаляет файл.
+
+    Args:
+        photo: Объект PhotoSize от aiogram
+        bot: Экземпляр бота для скачивания файла
+
+    Returns:
+        Tuple[str, str] - (base64_data, media_type) или None в случае ошибки
+        media_type всегда 'image/jpeg' для фото Telegram
+    """
+    # Создаем временный файл с уникальным именем
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_file:
+        temp_path = tmp_file.name
+
+    try:
+        # Скачиваем файл через бота
+        file = await bot.get_file(photo.file_id)
+        await bot.download_file(file.file_path, destination=temp_path)
+
+        # Читаем и кодируем в base64
+        async with aiofiles.open(temp_path, 'rb') as f:
+            file_content = await f.read()
+            base64_data = base64.b64encode(file_content).decode('utf-8')
+
+        # Для фото Telegram всегда JPEG
+        return (base64_data, 'image/jpeg')
+
+    except Exception as e:
+        print(f"Ошибка при обработке фото: {e}")
+        return None
+
+    finally:
+        # Гарантированно удаляем временный файл
+        try:
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+        except Exception:
+            ...
