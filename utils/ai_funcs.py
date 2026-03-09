@@ -26,8 +26,8 @@ proxy = config.proxy
 client = AsyncAnthropic(
     api_key=config.apimart.api_key,
     base_url="https://api.apimart.ai"
-    #http_client=httpx.AsyncClient(proxy=f'http://{proxy.login}:{proxy.password}@{proxy.ip}:{proxy.port}')
 )
+#http_client=httpx.AsyncClient(proxy=f'http://{proxy.login}:{proxy.password}@{proxy.ip}:{proxy.port}')
 
 logger = logging.getLogger(__name__)
 
