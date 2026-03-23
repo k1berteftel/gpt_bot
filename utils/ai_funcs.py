@@ -264,7 +264,7 @@ async def solve_task(image: PhotoSize, bot: Bot, prompt: str | None = None):
     else:
         messages.append({"role": "user", "content": prompt})
     message = await client.messages.create(
-        model="claude-sonnet-4-5-20250929",
+        model="claude-haiku-4-5-20251001",
         max_tokens=1024,
         system=prompt,
         messages=messages
@@ -296,7 +296,7 @@ async def get_prompt_answer(prompt: str, text: str, bot: Bot, image: PhotoSize |
     else:
         messages.append({"role": "user", "content": text})
     message = await client.messages.create(
-        model="claude-sonnet-4-5-20250929",
+        model="claude-haiku-4-5-20251001",
         max_tokens=1024,
         system=prompt,
         messages=messages
@@ -330,7 +330,7 @@ async def get_ai_answer(prompt: str | None, bot: Bot, image: PhotoSize | None = 
     else:
         messages.append({"role": "user", "content": prompt})
     message = await client.messages.create(
-        model="claude-sonnet-4-5-20250929",
+        model="claude-haiku-4-5-20251001",
         max_tokens=1024,
         messages=messages
     )
