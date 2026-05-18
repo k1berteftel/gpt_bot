@@ -340,14 +340,14 @@ async def get_ai_answer(prompt: str | None, bot: Bot, image: PhotoSize | None = 
 
 
 async def generate_on_api(params: dict) -> str:
-    url = 'http://127.0.0.1:8000/'
+    url = 'http://127.0.0.1:8001/'
     async with aiohttp.ClientSession() as session:
         async with session.post(url + 'generate', json=params, ssl=False) as response:
             if response.status != 200:
                 raise RuntimeError(f"Ошибка сети при обращении к API: {await response.content.read()}")
             data = await response.json()
             task_id = data['task_id']
-        url = f'http://127.0.0.1:8000/result/{task_id}'
+        url = f'http://127.0.0.1:8001/result/{task_id}'
         while True:
             async with session.get(url) as response:
                 if response.status != 200:
