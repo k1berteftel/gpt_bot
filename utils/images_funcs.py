@@ -18,7 +18,7 @@ config: Config = load_config()
 
 
 async def _upload_image_to_imgbb(image_path: str) -> str | None:
-    url = 'https://files.storagecdn.online/upload'
+    url = 'https://files.unifically.com/upload'
 
     data = aiohttp.FormData()
     data.add_field('file',
